@@ -1,0 +1,102 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>USBTest</groupId>
+	<artifactId>USBTest</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	
+	<name>USBCardReaderMidlet</name>
+	<packaging>jar</packaging>
+	<organization>
+		<name>Ohrfandl, Krapfenbauer</name>
+	</organization>
+	
+	<properties>
+		<me2Version>2.0.3</me2Version>
+		<j2me.midlet.vendor>${project.organization.name}</j2me.midlet.vendor>
+		<j2me.midlet.name>${project.name}</j2me.midlet.name>
+		<j2me.midlet.version>${project.version}</j2me.midlet.version>
+		<j2me.midlet.configuration>CLDC-1.1</j2me.midlet.configuration>
+		<j2me.midlet.profile>MIDP-2.0</j2me.midlet.profile>
+	</properties>
+	
+	<dependencies>
+		<dependency>
+			<groupId>org.microemu</groupId>
+			<artifactId>microemulator</artifactId>
+			<version>${me2Version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<!--<dependency>
+			<groupId>jsr</groupId>
+			<artifactId>jsr257</artifactId>
+			<version>1</version>
+			<scope>provided</scope>
+		</dependency>-->
+	</dependencies>
+	
+	<build>
+		<sourceDirectory>src</sourceDirectory>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.1</version>
+				<configuration>
+					<source>1.4</source>
+					<target>1.4</target>
+					<compilerArguments>
+						<bootclasspath>${settings.localRepository}/org/microemu/cldcapi11/${me2Version}/cldcapi11-${me2Version}.jar${path.separator}${settings.localRepository}/org/microemu/midpapi20/${me2Version}/midpapi20-${me2Version}.jar</bootclasspath>
+					</compilerArguments>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.microemu</groupId>
+						<artifactId>midpapi20</artifactId>
+						<version>${me2Version}</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			
+			
+			<plugin>
+				<groupId>com.pyx4me</groupId>
+				<artifactId>j2me-maven-plugin</artifactId>
+				<version>2.0.4</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>package</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<useWtkLibs>false</useWtkLibs>
+					<proguardPreverify>true</proguardPreverify>
+					<proguardInclude>${basedir}/proguard.conf</proguardInclude>
+					<proguard>true</proguard>
+					<obfuscate>true</obfuscate>
+					<midlets>
+						<MIDlet>
+							<name>${project.name}</name>
+							<icon>/pyx.png</icon>
+							<class>USBTest</class>
+						</MIDlet>
+					</midlets>
+					<libs>
+						<lib>${settings.localRepository}/org/microemu/cldcapi11/${me2Version}/cldcapi11-${me2Version}.jar</lib>
+						<lib>${settings.localRepository}/org/microemu/midpapi20/${me2Version}/midpapi20-${me2Version}.jar</lib>
+					</libs>
+					<dependencies>
+						<dependency>
+							<groupId>org.microemu</groupId>
+							<artifactId>microemulator</artifactId>
+							<exclude>true</exclude>
+						</dependency>
+					</dependencies>
+				</configuration>
+			</plugin>
+			
+		</plugins>
+	</build>
+	
+</project>
