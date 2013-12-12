@@ -1,0 +1,74 @@
+%%%%%%%%%%%%%%%%
+% (M)NSA - Lab1
+%%%%%%%%%%%%%%%%
+
+
+% Headers
+\input{headers.tex}
+
+% Beginn des Dokuments
+\begin{document}
+
+% Titlepage
+\include{titlepage}
+
+
+% Einleitung
+\include{sections/introduction/introduction}
+
+% Table of Contents
+\tableofcontents
+\newpage
+
+
+%
+% Sections
+%
+
+
+% Problemstellung / Zielsetzung
+\include{sections/goal/goal}
+
+% Methodisches Vorgehen
+\include{sections/method/method}
+
+% Resultat
+\include{sections/result/result}
+
+% Erkenntnisse
+\include{sections/knowledge/knowledge}
+
+% Zusammenfassung
+\include{sections/summary/summary}
+
+
+\newpage
+% Bibliography
+\printbibliography
+
+\newpage
+
+\begin{appendices}
+
+% List of Figures, List of Tables
+\listoffigures
+\listoftables
+
+% Abkürzungsverzeichnis
+\section{Abkürzungsverzeichnis}
+\begin{acronym}
+% \acro{BSC}{Balanced Scorecard}
+% \acro{BSI}{Bundesamt für Sicherheit in der Informationstechnik}
+% \acro{BYOD}{Bring your own Device}
+% \acro{KPI}{Key Performance Indicator}
+% \acro{MDM}{Mobile Device Management}
+% \acro{PUOCE}{Private Use of Corporate Equipment}
+% \acro{VPN}{Virtual private Network}
+% \acro{TPM}{Trusted Platform Module}
+\end{acronym}
+
+\end{appendices}
+
+
+% Ende des Dokuments
+\end{document}
