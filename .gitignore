@@ -9,11 +9,6 @@ target/
 # Java generally #
 *.class
 
-# Package Files #
-*.jar
-*.war
-*.ear
-
 # Documentary stuff #
 *.acn
 *.acr
@@ -49,7 +44,6 @@ target/
 *.xdy
 *.tdo
 *.bcf
-*.xml
 *.fls
 *.pdf
 *.doc
