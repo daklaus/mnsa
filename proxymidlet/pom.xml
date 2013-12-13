@@ -6,7 +6,7 @@
 		<artifactId>root</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	
+
 	<artifactId>proxymidlet</artifactId>
 	<name>USB to SmartCard Proxy MIDlet</name>
 
@@ -20,6 +20,13 @@
 		<j2me.midlet.profile>MIDP-2.0</j2me.midlet.profile>
 	</properties>
 
+	<repositories>
+		<repository>
+			<id>lib</id>
+			<url>${project.baseUri}/lib</url>
+		</repository>
+	</repositories>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.microemu</groupId>
@@ -27,8 +34,23 @@
 			<version>${me2Version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<!--<dependency> <groupId>jsr</groupId> <artifactId>jsr257</artifactId> 
-			<version>1</version> <scope>provided</scope> </dependency> -->
+		<dependency>
+			<groupId>at.ac.tuwien.mnsa.ue1</groupId>
+			<artifactId>protocol</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.nokia</groupId>
+			<artifactId>jsr257</artifactId>
+			<version>1.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<!-- <dependency> -->
+		<!-- <groupId>com.nokia</groupId> -->
+		<!-- <artifactId>jsr257-extensions</artifactId> -->
+		<!-- <version>1.0</version> -->
+		<!-- <scope>provided</scope> -->
+		<!-- </dependency> -->
 	</dependencies>
 
 	<build>
