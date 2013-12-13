@@ -13,6 +13,8 @@ import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.TextBox;
 import javax.microedition.midlet.MIDlet;
 
+import at.ac.tuwien.mnsa.ue1.sc.TestSmartCard;
+
 /**
  * MIDlet reads System properties Comm ports, opens CommConnection to port COM0
  * attempts to get and set Baud rate, writes text string over CommConnection
@@ -23,7 +25,7 @@ public class ProxyMIDlet extends MIDlet implements CommandListener {
 	private Command startCommand;
 	private Command exitCommand;
 	private Display display;
-	private TextBox textbox;
+	public static TextBox textbox;
 	private CommConnection comm = null;
 	private InputStream is = null;
 	private OutputStream os = null;
@@ -48,6 +50,9 @@ public class ProxyMIDlet extends MIDlet implements CommandListener {
 		display.setCurrent(textbox);
 		tracer = new Tracer(textbox);
 		openUSBConnection();
+
+		// Test NFC
+		new TestSmartCard(os);
 	}
 
 	public void pauseApp() {
