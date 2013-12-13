@@ -1,0 +1,143 @@
+\documentclass[11pt,a4paper]{scrartcl}
+\usepackage[ngerman]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[a4paper,left=2cm,right=2cm,bottom=3cm,top=3cm]{geometry}
+
+% Für Pipes usw.
+\usepackage[T1]{fontenc}
+
+% Nummerierung der Bilder nach sections
+%\renewcommand{\thefigure}{\arabic{section}.\arabic{figure}}
+%\makeatletter \@addtoreset{figure}{section} \makeatother
+
+% Nummerierung der Bilder nach sections
+%\renewcommand{\thetable}{\arabic{section}.\arabic{table}}
+%\makeatletter \@addtoreset{table}{section} \makeatother
+
+
+\usepackage[titletoc]{appendix}
+
+\usepackage{perpage}
+\MakePerPage{footnote}
+
+\usepackage{type1cm}
+
+\usepackage{lettrine}
+
+\usepackage[backend=biber,sorting=nyt,style=authoryear]{biblatex}
+
+\makeatletter
+
+\newrobustcmd*{\parentexttrack}[1]{%
+  \begingroup
+  \blx@blxinit
+  \blx@setsfcodes
+  \blx@bibopenparen#1\blx@bibcloseparen
+  \endgroup}
+
+\AtEveryCite{%
+  \let\parentext=\parentexttrack%
+  \let\bibopenparen=\bibopenbracket%
+  \let\bibcloseparen=\bibclosebracket}
+
+\makeatother
+
+\usepackage{csquotes}
+\bibliography{references}
+\DeclareLanguageMapping{german}{german-apa}
+
+\usepackage{eurosym}
+\usepackage{tabularx}
+
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{graphicx}
+\usepackage{ulem}
+\usepackage{float}
+\restylefloat{figure}
+
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amstext}
+
+\usepackage{enumerate}
+\usepackage{multicol}
+\usepackage{wrapfig}
+\usepackage{array}
+\usepackage{caption}
+\usepackage{listings}
+\usepackage{lastpage}
+\usepackage{acronym}
+\usepackage{newclude}
+
+\usepackage{blindtext}
+
+\usepackage[nottoc,numbib]{tocbibind}
+
+% Tabellen
+\usepackage{color, colortbl}
+\usepackage{longtable}
+\usepackage{tablefootnote}
+\usepackage{booktabs, multirow, array}
+\usepackage{tabularx} % fuer einseitige tabellen
+\usepackage{supertabular} % mehrseitige tabellen
+\definecolor{lightgray}{gray}{0.9}
+
+%-------------------------------------------------------------------------------
+% Variables:
+\newcommand{\mnsaGroup}{Gruppe XX}
+\newcommand{\studentA}{Klaus Krapfenbauer BSc\\e0926457}
+\newcommand{\studentB}{Ing. Christian Ohrfandl BSc\\e0926341}
+\newcommand{\datum}{12.12.2013}
+\newcommand{\prsubject}{Übung 1}
+\newcommand{\prdescription}{Verwendung eines NFC fähigen Telefons als PC/SC Reader}
+\newcommand{\lva}{(Mobile) Network Services and Applications}
+\newcommand{\lvanr}{183.286}
+\newcommand{\betreuer}{Projektass. Dipl.-Ing.(FH) Dr.techn. Gerald Madlmayr}
+\newcommand{\betreueremail}{gerald.madlmayr@tuwien.ac.at}
+%-------------------------------------------------------------------------------
+
+\usepackage{url}
+\usepackage{fancyhdr}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot{}
+\rfoot{{\footnotesize \textnormal{\thepage}}}
+\rhead{{\footnotesize \textnormal{\lvanr~--~\lva}}}
+\lfoot{{\footnotesize \textnormal{\prdescription}}}
+\lhead{{\footnotesize \textnormal{\prsubject}}}
+
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex}
+
+\setlength{\tabcolsep}{3mm}
+\renewcommand{\arraystretch}{1.5}
+
+%\bibliographystyle{dinat}
+
+\lstset{%
+	basicstyle=\ttfamily,
+	language=Java, % Hier bitte bei Bedarf eure Programmiersprache einsetzen (ftp://ftp.tex.ac.uk/tex-archive/macros/latex/contrib/listings/listings.pdf Table 1)
+	keywordstyle=\color{Blue}\bfseries,
+	% underlined bold black keywords
+	identifierstyle=,
+	% nothing happens
+	commentstyle=\ttfamily,
+	stringstyle=\ttfamily,
+	showstringspaces=false,
+%	numbers=left,
+	frameround=tttt,
+	frame=single,
+	texcl=true
+}
+
+\usepackage[
+	pdfstartview={FitV},
+	pdftitle={\prsubject}, % Projektname
+	pdfauthor={MDM Group},
+	pdfsubject={\prsubject}, % Projektname
+	colorlinks=false,
+]{hyperref}
