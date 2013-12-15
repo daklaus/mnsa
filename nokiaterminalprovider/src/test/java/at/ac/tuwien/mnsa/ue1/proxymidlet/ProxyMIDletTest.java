@@ -10,15 +10,12 @@ import java.util.Properties;
 
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import at.ac.tuwien.mnsa.ue1.properties.PropertiesServiceFactory;
 import at.ac.tuwien.mnsa.ue1.properties.USBConnectionPropertiesService;
-import at.ac.tuwien.mnsa.ue1.protocol.SerialPacket;
-import at.ac.tuwien.mnsa.ue1.protocol.TooLongPayloadException;
 
 public class ProxyMIDletTest {
 
@@ -58,16 +55,16 @@ public class ProxyMIDletTest {
 
 	@Test
 	public void testEcho() throws IOException {
-//		SerialPacket expectedP = null;
-//		try {
-//			expectedP = new SerialPacket(SerialPacket.TYPE_APDU,
-//					SerialPacket.DEFAULT_NAD);
-//
-//			expectedP.write(outputStream);
-//
-//			SerialPacket actualP = SerialPacket.readFromStream(inputStream);
-//
-//		} catch (TooLongPayloadException e) {
-//		}
+		// SerialPacket expectedP = null;
+		// try {
+		// expectedP = new SerialPacket(SerialPacket.TYPE_APDU,
+		// SerialPacket.DEFAULT_NAD);
+		//
+		// expectedP.write(outputStream);
+		//
+		// SerialPacket actualP = SerialPacket.readFromStream(inputStream);
+		//
+		// } catch (TooLongPayloadException e) {
+		// }
 	}
 }

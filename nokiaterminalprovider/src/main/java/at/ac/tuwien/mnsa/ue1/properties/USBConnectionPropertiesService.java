@@ -11,8 +11,8 @@ import java.util.Properties;
  * @author klaus
  * 
  */
-class USBConnectionPropertiesService implements PropertiesService {
-	public static final String PROPERTIES_FILE = "USBConnection.properties";
+public class USBConnectionPropertiesService implements PropertiesService {
+	private static final String PROPERTIES_FILE = "USBConnection.properties";
 
 	public static final String PORT_KEY = "com.port";
 
@@ -27,7 +27,7 @@ class USBConnectionPropertiesService implements PropertiesService {
 		public static final PropertiesService INSTANCE = new USBConnectionPropertiesService();
 	}
 
-	public static PropertiesService getInstance() {
+	static PropertiesService getInstance() {
 		return PropertiesServiceHolder.INSTANCE;
 	}
 
