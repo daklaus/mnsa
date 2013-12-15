@@ -1,18 +1,15 @@
-package at.ac.tuwien.mnsa.ue1.proxymidlet;
+package at.ac.tuwien.mnsa.ue1.client;
 
 import gnu.io.CommPortIdentifier;
+import gnu.io.NoSuchPortException;
+import gnu.io.PortInUseException;
 import gnu.io.SerialPort;
+import gnu.io.UnsupportedCommOperationException;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Properties;
-
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 import at.ac.tuwien.mnsa.ue1.properties.PropertiesServiceFactory;
 import at.ac.tuwien.mnsa.ue1.properties.USBConnectionPropertiesService;
@@ -24,10 +21,11 @@ public class ProxyMIDletTest {
 	private static SerialPort serialPort;
 	private static InputStream inputStream;
 	private static OutputStream outputStream;
-	private static final int CONNECTION_TIMEOUT = 1000;
+	private static final int CONNECTION_TIMEOUT = 100;
 
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
+	public static void main(String[] args) throws IOException,
+			PortInUseException, NoSuchPortException,
+			UnsupportedCommOperationException {
 
 		Properties prop = PropertiesServiceFactory.getPropertiesService()
 				.getProperties();
@@ -40,33 +38,20 @@ public class ProxyMIDletTest {
 
 		inputStream = serialPort.getInputStream();
 		outputStream = serialPort.getOutputStream();
-	}
 
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
+		SerialPacket expectedP = null;
+		try {
+			expectedP = new SerialPacket(SerialPacket.TYPE_APDU,
+					SerialPacket.DEFAULT_NAD);
+
+			expectedP.write(outputStream);
+
+			SerialPacket actualP = SerialPacket.readFromStream(inputStream);
+
+		} catch (TooLongPayloadException e) {
+		}
+
 		serialPort.close();
 	}
 
-	@Before
-	public void setUp() throws Exception {
-	}
-
-	@After
-	public void tearDown() throws Exception {
-	}
-
-	@Test
-	public void testEcho() throws IOException {
-		// SerialPacket expectedP = null;
-		// try {
-		// expectedP = new SerialPacket(SerialPacket.TYPE_APDU,
-		// SerialPacket.DEFAULT_NAD);
-		//
-		// expectedP.write(outputStream);
-		//
-		// SerialPacket actualP = SerialPacket.readFromStream(inputStream);
-		//
-		// } catch (TooLongPayloadException e) {
-		// }
-	}
 }
