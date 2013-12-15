@@ -16,7 +16,7 @@ public class ISO14443Conn implements TargetListener {
 
 	private ISO14443Connection smc;
 	private TargetProperties target;
-	private static final Logger LOG = Logger.getLogger("MainMidlet");
+	private static final Logger LOG = Logger.getLogger("SerialConn");
 
 	public ISO14443Conn() throws ContactlessException {
 		DiscoveryManager dm = DiscoveryManager.getInstance();
@@ -38,7 +38,7 @@ public class ISO14443Conn implements TargetListener {
 	}
 
 	// Some parts from Nokia (jsr-257-spec-1.0.pdf)
-	public byte[] sendAPDU(byte[] payload) {
+	public byte[] sendAPDU(byte[] payload) throws ContactlessException {
 		LOG.print("Got into sendAPDU");
 		
 		if (target == null) {
@@ -75,10 +75,12 @@ public class ISO14443Conn implements TargetListener {
 			} catch (IOException e) {
 				LOG.print("Error: IOException while sending ADPU");
 				closeConnection();
-			} catch (ContactlessException e) {
-				LOG.print("Error: ContactlessException while sending ADPU");
-				closeConnection();
-			}
+			} 
+			// catch (ContactlessException e) {
+			// LOG.print("Error: ContactlessException while sending ADPU");
+			// return
+			// closeConnection();
+			// }
 		}
 
 		return null;

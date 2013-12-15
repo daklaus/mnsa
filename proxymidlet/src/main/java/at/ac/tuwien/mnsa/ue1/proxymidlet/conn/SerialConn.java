@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import javax.microedition.contactless.ContactlessException;
 import javax.microedition.io.CommConnection;
 import javax.microedition.io.Connector;
 
@@ -56,81 +57,112 @@ public class SerialConn implements Runnable {
 				close();
 			}
 
-			try {
-				byte packetType = packet.getMessageType();
-				LOG.print("whileloop: got packettype...");
+			byte packetType = packet.getMessageType();
+			LOG.print("whileloop: got packettype...");
 
-				switch (packetType) {
+			switch (packetType) {
 
-				case SerialPacket.TYPE_WAIT:
-					// TODO
-					break;
+			case SerialPacket.TYPE_WAIT:
+				// TODO
+				break;
 
-				case SerialPacket.TYPE_APDU:
-					try {
-						LOG.print("Switch: Got into ADPU");
-						responsePayload = nfcConnection.sendAPDU(packet
-								.getPayload());
-						LOG.print("Switch: ADPU - got response from nfc card");
-						if (responsePayload != null) {
-							LOG.print("Switch: ADPU - if responsepacket != null");
-							responsePacket = new SerialPacket(
-									SerialPacket.TYPE_APDU,
-									SerialPacket.DEFAULT_NAD, responsePayload);
-							LOG.print("value: " + new String(responsePayload));
-						} else {
-							LOG.print("Switch: ADPU - else responsepacket...");
-							responsePacket = new SerialPacket(
-									SerialPacket.TYPE_ERROR,
-									SerialPacket.DEFAULT_NAD);
-						}
-						LOG.print("Switch: Before Sending");
-					} catch (TooLongPayloadException e1) {
-						LOG.print("Switch: ADPU - Error");
-					}
-					// TODO
-					break;
-
-				case SerialPacket.TYPE_DEBUGINFO:
-					// TODO
-					break;
-
-				case SerialPacket.TYPE_ERROR:
-					// TODO
-					break;
-
-				case SerialPacket.TYPE_INFOTEXT:
-					// TODO
-					break;
-
-				case SerialPacket.TYPE_INIT:
-					// TODO
-					break;
-
-				case SerialPacket.TYPE_STATUS:
-					// TODO
-					break;
-
-				case SerialPacket.TYPE_TERMINFO:
-					// TODO
-					break;
-
-				default:
-					break;
-				}
-
+			case SerialPacket.TYPE_APDU:
 				try {
-					if (responsePacket != null) {
-						LOG.print("Sending Packet...");
-						responsePacket.write(outStream);
-						outStream.flush();
+					LOG.print("Switch: Got into ADPU");
+					responsePayload = nfcConnection.sendAPDU(packet
+							.getPayload());
+					LOG.print("Switch: ADPU - got response from nfc card");
+					if (responsePayload != null) {
+						LOG.print("Switch: ADPU - if responsepacket != null");
+						responsePacket = new SerialPacket(
+								SerialPacket.TYPE_APDU,
+								SerialPacket.DEFAULT_NAD, responsePayload);
+						LOG.print("value: " + new String(responsePayload));
+					} else {
+						LOG.print("Switch: ADPU - else responsepacket...");
+						responsePacket = new SerialPacket(
+								SerialPacket.TYPE_ERROR,
+								SerialPacket.DEFAULT_NAD);
 					}
-				} catch (IOException e) {
-					LOG.print("Error: Sending packet");
-					close();
+					LOG.print("Switch: Before Sending");
+				} catch (TooLongPayloadException e1) {
+					LOG.print("Switch: ADPU - Error");
+				} catch (ContactlessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-			} catch (Exception e) {
-				LOG.print(e.getMessage());
+				// TODO
+				break;
+
+			case SerialPacket.TYPE_DEBUGINFO:
+				// TODO
+				break;
+
+			case SerialPacket.TYPE_ERROR:
+				// TODO
+				break;
+
+			case SerialPacket.TYPE_INFOTEXT:
+				// TODO
+				break;
+
+			case SerialPacket.TYPE_INIT:
+				// TODO
+				break;
+
+			case SerialPacket.TYPE_STATUS:
+				try {
+					LOG.print("Switch: Got into Status");
+					responsePayload = nfcConnection
+							.sendAPDU(new byte[] { (byte) 0x00, (byte) 0xA4,
+									(byte) 0x04, (byte) 0x00 });
+					LOG.print("Switch: Status - got response from nfc card");
+					if (responsePayload != null) {
+						LOG.print("Switch: Status - if responsepacket != null");
+						responsePacket = new SerialPacket(
+								SerialPacket.TYPE_STATUS,
+								SerialPacket.DEFAULT_NAD,
+								new byte[] { (byte) 0x01 });
+						LOG.print("status value: "
+								+ new String(responsePayload));
+					} else {
+						LOG.print("Switch: ADPU - else responsepacket...");
+						responsePacket = new SerialPacket(
+								SerialPacket.TYPE_ERROR,
+								SerialPacket.DEFAULT_NAD);
+					}
+					LOG.print("Switch: Before Sending");
+				} catch (TooLongPayloadException e1) {
+					LOG.print("Switch: ADPU - Error");
+				} catch (ContactlessException e) {
+					try {
+						responsePacket = new SerialPacket(
+								SerialPacket.TYPE_STATUS,
+								SerialPacket.DEFAULT_NAD,
+								new byte[] { (byte) 0x00 });
+					} catch (TooLongPayloadException e1) {
+					}
+				}
+				// TODO
+				break;
+
+			case SerialPacket.TYPE_TERMINFO:
+				// TODO
+				break;
+
+			default:
+				break;
+			}
+
+			try {
+				if (responsePacket != null) {
+					LOG.print("Sending Packet...");
+					responsePacket.write(outStream);
+					outStream.flush();
+				}
+			} catch (IOException e) {
+				LOG.print("Error: Sending packet");
+				close();
 			}
 		}
 	}
