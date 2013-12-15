@@ -5,21 +5,24 @@ import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
+import javax.microedition.lcdui.Form;
 import javax.microedition.lcdui.TextBox;
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
 
-import at.ac.tuwien.mnsa.ue1.nfcmidlet.conn.ISO14443Conn;
-import at.ac.tuwien.mnsa.ue1.nfcmidlet.conn.SerialConn;
+import at.ac.tuwien.mnsa.ue1.proxymidlet.conn.ISO14443Conn;
+import at.ac.tuwien.mnsa.ue1.proxymidlet.conn.SerialConn;
 
 public class MainMidlet extends MIDlet implements CommandListener {
 
 	private Command exitCommand;
 	private Display display;
 	private TextBox textbox;
+	private Form form;
 	private ISO14443Conn nfcConnection;
 	private SerialConn serialConnection;
 	private Thread serialThread;
+	private static final Logger LOG = Logger.getLogger("MainMidlet");
 
 	public MainMidlet() {
 		display = Display.getDisplay(this);
@@ -27,7 +30,12 @@ public class MainMidlet extends MIDlet implements CommandListener {
 	}
 
 	protected void destroyApp(boolean arg0) throws MIDletStateChangeException {
-		// TODO
+		if (serialConnection != null)
+			serialConnection.close();
+		if (serialThread != null) {
+			if (serialThread.isAlive())
+				serialThread.interrupt();
+		}
 
 		if (nfcConnection != null)
 			nfcConnection.closeConnection();
@@ -39,10 +47,24 @@ public class MainMidlet extends MIDlet implements CommandListener {
 
 	protected void startApp() throws MIDletStateChangeException {
 		try {
-			textbox = new TextBox("NFC-Midlet", "", 8000, 0);
-			textbox.addCommand(exitCommand);
-			textbox.setCommandListener(this);
-			display.setCurrent(textbox);
+			// textbox = new TextBox("NFC-Midlet", "", 8000, 0);
+			// textbox.addCommand(exitCommand);
+			// textbox.setCommandListener(this);
+			// display.setCurrent(textbox);
+
+			form = new Form("Cardterminal Form");
+			Display.getDisplay(this).setCurrent(form);
+			Logger.init(form);
+			form.addCommand(exitCommand);
+
+			form.setCommandListener(new CommandListener() {
+				public void commandAction(Command c, Displayable d) {
+					if (c == exitCommand) {
+						LOG.print("Exiting...");
+						notifyDestroyed();
+					}
+				}
+			});
 
 			// Start NFC Connection
 			nfcConnection = new ISO14443Conn();

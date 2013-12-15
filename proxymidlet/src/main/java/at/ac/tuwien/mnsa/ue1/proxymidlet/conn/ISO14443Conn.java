@@ -1,4 +1,4 @@
-package at.ac.tuwien.mnsa.ue1.nfcmidlet.conn;
+package at.ac.tuwien.mnsa.ue1.proxymidlet.conn;
 
 import java.io.IOException;
 import javax.microedition.contactless.ContactlessException;
