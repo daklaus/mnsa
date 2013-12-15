@@ -243,7 +243,9 @@ public class SerialPacket {
 	 * 
 	 * @return the package as a byte array
 	 */
-	public byte[] getBytes() {
+	// TODO Change to private and rewrite unit tests accordingly
+	// It is only for the use of unit tests not set to private
+	byte[] getBytes() {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		try {
 			this.write(os);
@@ -302,7 +304,9 @@ public class SerialPacket {
 	 *            the low byte of the short
 	 * @return the integer of the interpreted short
 	 */
-	public static int getIntFromUnsignedShortBytes(byte lnh, byte lnl) {
+	// TODO Change to private and rewrite unit tests accordingly
+	// It is only for the use of unit tests not set to private
+	static int getIntFromUnsignedShortBytes(byte lnh, byte lnl) {
 		return ((lnh & 0x000000ff) << 8) + (lnl & 0x000000ff);
 	}
 
