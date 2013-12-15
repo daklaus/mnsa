@@ -27,6 +27,7 @@ public class SerialConn implements Runnable {
 			inStream = USBConnection.openInputStream();
 			outStream = USBConnection.openOutputStream();
 		} catch (IOException e) {
+			LOG.print("Error: Initializing Connections");
 			running = false;
 		}
 
@@ -38,9 +39,12 @@ public class SerialConn implements Runnable {
 
 			try {
 				packet = SerialPacket.readFromStream(inStream);
+				
 			} catch (IOException e) {
+				LOG.print("Error: IOException while reading SerialStream");
 				close();
 			} catch (TooLongPayloadException e) {
+				LOG.print("Error: Too long payload");
 				close();
 			}
 			
@@ -56,6 +60,7 @@ public class SerialConn implements Runnable {
 
 			case SerialPacket.TYPE_APDU:
 				try {
+					LOG.print("Got into ADPU");
 					responsePayload = nfcConnection.sendAPDU(packet
 							.getPayload());
 					if (responsePayload != null) {
@@ -68,6 +73,7 @@ public class SerialConn implements Runnable {
 						responsePacket = new SerialPacket(
 								SerialPacket.TYPE_ERROR,
 								SerialPacket.DEFAULT_NAD);
+					LOG.print("ResponsePacket: " + responsePacket.toString());
 				} catch (TooLongPayloadException e1) {
 				}
 				// TODO
@@ -103,10 +109,12 @@ public class SerialConn implements Runnable {
 
 			try {
 				if (responsePacket != null) {
+					LOG.print("Sending Packet...");
 					responsePacket.write(outStream);
 					outStream.flush();
 				}
 			} catch (IOException e) {
+				LOG.print("Error: Sending packet");
 				close();
 			}
 		}
@@ -114,6 +122,7 @@ public class SerialConn implements Runnable {
 
 	public void close() {
 		try {
+			LOG.print("Closing connections...");
 			running = false;
 			if (outStream != null)
 				outStream.close();
@@ -122,6 +131,7 @@ public class SerialConn implements Runnable {
 			if (USBConnection != null)
 				USBConnection.close();
 		} catch (IOException e) {
+			LOG.print("Error: Closing Connections");
 		}
 	}
 }

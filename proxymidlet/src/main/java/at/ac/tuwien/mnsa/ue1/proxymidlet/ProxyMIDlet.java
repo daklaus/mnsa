@@ -51,7 +51,7 @@ public class ProxyMIDlet extends MIDlet implements CommandListener {
 			// textbox.addCommand(exitCommand);
 			// textbox.setCommandListener(this);
 			// display.setCurrent(textbox);
-
+			
 			form = new Form("Cardterminal Form");
 			Display.getDisplay(this).setCurrent(form);
 			Logger.init(form);
@@ -68,11 +68,13 @@ public class ProxyMIDlet extends MIDlet implements CommandListener {
 
 			// Start NFC Connection
 			nfcConnection = new ISO14443Conn();
+			LOG.print("Started NFC connection");
 
 			// Start NFC Card Listening
 			serialConnection = new SerialConn();
 			serialThread = new Thread(serialConnection);
 			serialThread.start();
+			LOG.print("Started USB");
 
 		} catch (ContactlessException e) {
 		}
