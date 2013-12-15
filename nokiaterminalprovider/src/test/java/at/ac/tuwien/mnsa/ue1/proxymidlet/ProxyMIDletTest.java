@@ -29,22 +29,23 @@ public class ProxyMIDletTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 
-		Properties prop = PropertiesServiceFactory.getPropertiesService()
-				.getProperties();
-		String comPort = prop
-				.getProperty(USBConnectionPropertiesService.PORT_KEY);
-
-		serialPort = (SerialPort) CommPortIdentifier.getPortIdentifier(comPort)
-				.open("Test Terminal", CONNECTION_TIMEOUT);
-		serialPort.enableReceiveTimeout(CONNECTION_TIMEOUT);
-
-		inputStream = serialPort.getInputStream();
-		outputStream = serialPort.getOutputStream();
+		// Properties prop = PropertiesServiceFactory.getPropertiesService()
+		// .getProperties();
+		// String comPort = prop
+		// .getProperty(USBConnectionPropertiesService.PORT_KEY);
+		//
+		// serialPort = (SerialPort)
+		// CommPortIdentifier.getPortIdentifier(comPort)
+		// .open("Test Terminal", CONNECTION_TIMEOUT);
+		// serialPort.enableReceiveTimeout(CONNECTION_TIMEOUT);
+		//
+		// inputStream = serialPort.getInputStream();
+		// outputStream = serialPort.getOutputStream();
 	}
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
-		serialPort.close();
+		// serialPort.close();
 	}
 
 	@Before
