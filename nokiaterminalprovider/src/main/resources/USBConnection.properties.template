@@ -1,2 +1,2 @@
 # Enter the COM port your computer assigned to the Nokia phone
-com.port = "COM3"
+com.port = COM3
