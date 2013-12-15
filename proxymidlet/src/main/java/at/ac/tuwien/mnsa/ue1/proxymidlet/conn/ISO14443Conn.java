@@ -39,29 +39,36 @@ public class ISO14443Conn implements TargetListener {
 
 	// Some parts from Nokia (jsr-257-spec-1.0.pdf)
 	public byte[] sendAPDU(byte[] payload) {
+		LOG.print("Got into sendAPDU");
+		
 		if (target == null) {
+			LOG.print("sendAPDU: return null...");
 			return null;
 		}
 
 		if (smc == null) {
+			LOG.print("got into if smc == null");
 			Class[] classes = target.getConnectionNames();
 
 			try {
 				for (int i = 0; i < classes.length; i++) {
-
 					if (classes[i]
 							.equals(Class
 									.forName("javax.microedition.contactless.sc.ISO14443Connection"))) {
+						LOG.print("sendAPDU: got into connection if");
 						String url = target.getUrl(classes[i]);
 						smc = (ISO14443Connection) Connector.open(url);
+						LOG.print("sendAPDU: set smc");
 					}
 
 				}
 				
-				LOG.print("Sent and received packet");
-
+				LOG.print("Send and receive data to/from nfc card...");
 				// Send command to smart card and return response
-				return smc.exchangeData(payload);
+				byte [] temp = smc.exchangeData(payload);
+				
+				LOG.print("return received packet...");
+				return temp;
 
 			} catch (ClassNotFoundException e) {
 				LOG.print("Error: ClassNotFound");

@@ -22,7 +22,7 @@ public class ProxyMIDlet extends MIDlet implements CommandListener {
 	private ISO14443Conn nfcConnection;
 	private SerialConn serialConnection;
 	private Thread serialThread;
-	private static final Logger LOG = Logger.getLogger("MainMidlet");
+	private static final Logger LOG = Logger.getLogger("ProxyMidlet");
 
 	public ProxyMIDlet() {
 		display = Display.getDisplay(this);
@@ -71,12 +71,13 @@ public class ProxyMIDlet extends MIDlet implements CommandListener {
 			LOG.print("Started NFC connection");
 
 			// Start NFC Card Listening
-			serialConnection = new SerialConn();
+			serialConnection = new SerialConn(nfcConnection);
 			serialThread = new Thread(serialConnection);
 			serialThread.start();
 			LOG.print("Started USB");
 
 		} catch (ContactlessException e) {
+			LOG.print("startApp: ContactlessException...");
 		}
 	}
 
