@@ -13,7 +13,7 @@ import javax.microedition.midlet.MIDletStateChangeException;
 import at.ac.tuwien.mnsa.ue1.proxymidlet.conn.ISO14443Conn;
 import at.ac.tuwien.mnsa.ue1.proxymidlet.conn.SerialConn;
 
-public class MainMidlet extends MIDlet implements CommandListener {
+public class ProxyMIDlet extends MIDlet implements CommandListener {
 
 	private Command exitCommand;
 	private Display display;
@@ -24,7 +24,7 @@ public class MainMidlet extends MIDlet implements CommandListener {
 	private Thread serialThread;
 	private static final Logger LOG = Logger.getLogger("MainMidlet");
 
-	public MainMidlet() {
+	public ProxyMIDlet() {
 		display = Display.getDisplay(this);
 		exitCommand = new Command("Exit", Command.EXIT, 1);
 	}
