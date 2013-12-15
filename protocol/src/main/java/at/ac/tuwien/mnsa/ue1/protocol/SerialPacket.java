@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 
 /**
  * <p>
@@ -131,6 +132,7 @@ public class SerialPacket {
 	public static final byte OFFSET_PY = 4;
 	public static final byte HEADER_LENGTH = OFFSET_PY;
 	public static final int MAX_LENGTH = 65535; // 2 bytes = 2^16 - 1
+	private static final String stringCharset = "UTF-8";
 
 	/*
 	 * Fields
@@ -165,6 +167,30 @@ public class SerialPacket {
 		this.payload = payload;
 	}
 
+	public SerialPacket(byte messageType, byte nodeAddress, String payload)
+			throws TooLongPayloadException {
+		this.messageType = messageType;
+		this.nodeAddress = nodeAddress;
+
+		if (payload == null) {
+			this.payload = null;
+			return;
+		}
+
+		byte[] bPayload = new byte[] {};
+		try {
+			bPayload = payload.getBytes(stringCharset);
+		} catch (UnsupportedEncodingException e) {
+			// We trust in that the charset constant given in this class is a
+			// valid charset
+		}
+
+		if (bPayload.length >= MAX_LENGTH)
+			throw new TooLongPayloadException(bPayload.length);
+
+		this.payload = bPayload;
+	}
+
 	/**
 	 * Used for zero payload. For the parameters see
 	 * {@link #SerialPacket(byte, byte, byte[])}
@@ -177,7 +203,7 @@ public class SerialPacket {
 	 */
 	public SerialPacket(byte messageType, byte nodeAddress)
 			throws TooLongPayloadException {
-		this(messageType, nodeAddress, null);
+		this(messageType, nodeAddress, (byte[]) null);
 	}
 
 	/**
@@ -296,6 +322,20 @@ public class SerialPacket {
 
 	public byte[] getPayload() {
 		return payload;
+	}
+
+	public String getPayloadAsString() {
+		if (payload == null)
+			return null;
+
+		String ret = null;
+		try {
+			ret = new String(payload, stringCharset);
+		} catch (UnsupportedEncodingException e) {
+			// We trust in that the charset constant given in this class is a
+			// valid charset
+		}
+		return ret;
 	}
 
 	public String toString() {

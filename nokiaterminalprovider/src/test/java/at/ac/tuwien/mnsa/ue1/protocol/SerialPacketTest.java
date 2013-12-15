@@ -32,24 +32,14 @@ public class SerialPacketTest {
 
 	@Test
 	public void testGetBytes() throws TooLongPayloadException {
-		final byte nodeAddress = 0x10;
-		final int expectedLength = 0x300;
-		final byte pattern = 0x13;
-		final byte msgType = SerialPacket.TYPE_DEBUGINFO;
+		checkPacketContent(SerialPacket.TYPE_DEBUGINFO, (byte) 0x10, 0x300,
+				(byte) 0x13);
+	}
 
-		SerialPacket p = new SerialPacket(msgType, nodeAddress,
-				createByteArrayFromPattern(pattern, expectedLength));
-
-		byte[] b = p.getBytes();
-
-		assertEquals(b[SerialPacket.OFFSET_MTY], msgType);
-		assertEquals(b[SerialPacket.OFFSET_NAD], nodeAddress);
-		assertEquals(b[SerialPacket.OFFSET_LNH],
-				(expectedLength >> 8) & 0x000000ff);
-		assertEquals(b[SerialPacket.OFFSET_LNL], expectedLength & 0x000000ff);
-		for (int i = 0; i < expectedLength; i++) {
-			assertEquals(pattern, b[SerialPacket.OFFSET_PY + i]);
-		}
+	@Test
+	public void testZeroPayload() throws TooLongPayloadException {
+		checkPacketContent(SerialPacket.TYPE_DEBUGINFO, (byte) 0x10, 0x00,
+				(byte) 0x13);
 	}
 
 	@Test
@@ -94,6 +84,50 @@ public class SerialPacketTest {
 				createByteArrayFromPattern(pattern, expectedLength));
 
 		assertEquals(expectedLength, p.getLength());
+	}
+
+	@Test
+	public void testStringEncoding() throws TooLongPayloadException {
+		final byte nodeAddress = 0x10;
+		final byte msgType = SerialPacket.TYPE_DEBUGINFO;
+		final String expectedMsg = "This is a test!";
+
+		SerialPacket p = new SerialPacket(msgType, nodeAddress, expectedMsg);
+
+		assertEquals(expectedMsg, p.getPayloadAsString());
+	}
+
+	@Test
+	public void testStringNull() throws TooLongPayloadException {
+		final byte nodeAddress = 0x10;
+		final byte msgType = SerialPacket.TYPE_DEBUGINFO;
+		final String expectedMsg = null;
+
+		SerialPacket p = new SerialPacket(msgType, nodeAddress, expectedMsg);
+
+		assertEquals(expectedMsg, p.getPayloadAsString());
+	}
+
+	private void checkPacketContent(final byte msgType, final byte nodeAddress,
+			final int length, final byte pattern)
+			throws TooLongPayloadException {
+		SerialPacket p = new SerialPacket(msgType, nodeAddress,
+				createByteArrayFromPattern(pattern, length));
+
+		byte[] b = p.getBytes();
+
+		// logByteArray(b);
+
+		// Check packet length
+		assertEquals(b.length, SerialPacket.HEADER_LENGTH + length);
+		// Check packet content
+		assertEquals(b[SerialPacket.OFFSET_MTY], msgType);
+		assertEquals(b[SerialPacket.OFFSET_NAD], nodeAddress);
+		assertEquals(b[SerialPacket.OFFSET_LNH], (length >> 8) & 0x000000ff);
+		assertEquals(b[SerialPacket.OFFSET_LNL], length & 0x000000ff);
+		for (int i = 0; i < length; i++) {
+			assertEquals(pattern, b[SerialPacket.OFFSET_PY + i]);
+		}
 	}
 
 	private byte[] createByteArrayFromPattern(byte pattern, int length) {
