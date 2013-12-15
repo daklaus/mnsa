@@ -1,0 +1,129 @@
+\documentclass[paper=a4, fontsize=11pt]{scrartcl}
+\usepackage[svgnames]{xcolor}
+\usepackage[a4paper,pdftex]{geometry}
+
+\usepackage[german]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+\usepackage{fullpage}
+\usepackage{fancyhdr}
+% ------------------------------------------------------------------------------
+% Header and Footer Setup
+% ------------------------------------------------------------------------------
+\pagestyle{fancy}
+	\fancyhead[L]{INSO - Industrial Software\\ \small{Institut für Rechnergestützte Automation | Fakultät für Informatik | Technische Universität Wien}}
+	\fancyhead[C]{}
+	\fancyhead[R]{}
+	\fancyfoot[L]{J2ME-Cardreader für ISO/IEC 14443-Kommunkation} % Title
+	\fancyfoot[C]{}
+	\fancyfoot[R]{Seite \thepage}
+	\renewcommand{\headrulewidth}{1pt}
+	\renewcommand{\footrulewidth}{1pt}
+\setlength{\headheight}{0.5cm}
+\setlength{\headsep}{0.75cm}
+
+\usepackage{hyperref}
+	\hypersetup{
+		colorlinks,
+		citecolor=black,
+		filecolor=black,
+		linkcolor=black,
+		urlcolor=black
+	}
+
+\usepackage{pdfpages}
+
+\usepackage[babel,german=quotes]{csquotes}
+
+% ------------------------------------------------------------------------------
+% Title Setup
+% ------------------------------------------------------------------------------
+\newcommand{\HRule}[1]{\rule{\linewidth}{#1}}
+
+\makeatletter
+\def\printtitle{%
+	{\centering \@title\par}}
+\makeatother
+
+\makeatletter
+\def\printauthor{%
+	{\centering \normalsize \@author}}
+\makeatother
+
+
+\title{	\normalsize Erstellung eines J2ME-Cardreaders für Kontaktloskommunikation (ISO/IEC 14443)% Subtitle of the document
+	\\[2.0cm] \HRule{0.5pt} \\
+	\LARGE \textbf{\uppercase{Dokumentation Übung 1}} % Title
+	\HRule{2pt} \\[1.5cm]
+	\normalsize Wien am \today \\
+	\normalsize Technische Universität Wien \\[1.0cm]
+	\normalsize ausgeführt im Rahmen der Lehrveranstaltung \\
+	\LARGE 183.286 – (Mobile) Network Service Applications
+}
+
+
+\author{
+	Gruppe X \\[2.0cm]
+	Klaus Krapfenbauer \\
+	0926457 \\
+	E 066 937 \\
+	Software Engineering and Internet Computing \\[2.0cm]
+	Christian Ohrfandl \\
+	0926341 \\
+	E 066 937 \\
+	Software Engineering and Internet Computing \\[2.0cm]
+}
+
+\begin{document}
+% ------------------------------------------------------------------------------
+% Title Page
+% ------------------------------------------------------------------------------
+\thispagestyle{empty} % Remove page numbering on this page
+\printtitle
+	\vfill
+\printauthor
+
+% ------------------------------------------------------------------------------
+% Table of Contents
+% ------------------------------------------------------------------------------
+\newpage
+\tableofcontents
+
+% ------------------------------------------------------------------------------
+% Document
+% ------------------------------------------------------------------------------
+\newpage
+
+\section{Kurzfassung}
+Ein NFC-fähiges Endgerät soll als PC/SC Reader von einer Java-Anwendung verwendet werden können.
+
+\section{Einleitung}
+Ziel dieser Übung war es, einen Java Security Provider (SPI), aufbauend auf dem von der LVA Leitung bereitgestellten Nokia Provider, zu implementieren. Mit diesem SPI soll es möglich sein, über eine USB-Verbindung, eine Kommunikation zwischen einer NFC-fähigen Chipkarte und einem Java-Programm aufzubauen.
+
+\section{Problemstellung / Zielsetzung}
+Generell kann die Kommunikation zwischen der Chipkarte und dem Java-Programm in folgende Teile zerlegt werden:
+\begin{itemize}
+\item Java Programm inkl. SPI <--> Serielle Verbindung (USB)
+\item Serielle Verbindung <--> Software Client am Handy
+\item Midlet <--> Chipkarte
+\end{itemize}
+
+\section{Technischer Aufbau}
+
+\subsection{Java Programm inkl. SPI --> Serielle Verbindung <--> Software Client am Handy}
+Unsere Gruppe hat sich nach entsprechender Evaluation für den Einsatz von \textbf{nrjavaserial}  als Kommunikationslibrary entschieden, da es ein fork von RXTX ist, jedoch über ein Maven Repository zur Verfügung steht. Details siehe \url{https://code.google.com/p/nrjavaserial/}. Durch die Verwendung dieser Bibliothek, können APDUs über ein implementiertes Protokoll direkt an den Software Client am Handy (Midlet) geschickt werden (das Protokoll wurde nach den Spezifikationen der LVA Leitung entwickelt).
+
+\subsection{Software Client am Handy <--> Chipkarte}
+Das Midlet kann durch Verwendung der JSR 257 API mit der Chipkarte kommunizieren. Die Implementierung erfolgte mit Hilfe der offiziellen Nokia Spezifikationen (jsr-257-spec-1.0.pdf). So ist es möglich, APDUs an die Karte zu senden und natürlich Antworten zu empfangen, welche an das Java-Programm am PC zurückgesandt werden.
+
+\section{Resultat}
+Unsere Gruppe konnte fast alle Anforderungen implementieren. Einige Packet-Types, welche das angegebene Protokoll vorsieht, konnten aufgrund mangelnder Zeit nicht implementiert werden (STATUS, APDU und ATR wurden implementiert).
+\subsection{Installation}
+Das Projekt wird über Maven verwaltet. Des Weiteren gibt es für die USB-Verbindung gibt es ein Template (*.properties.template), welches noch an den USB-Port angepasst werden muss, welcher dem angeschlossenen Telefon zugewiesen wird.
+
+\section{Erkenntnisse}
+Für unsere Gruppe war das Thema NFC komplettes Neuland. Deshalb war es sehr interessant, die Standards für die Kommunikation zu erlernen. Jedoch wäre es unserer Meinung nach zielführender, aktuelle Betriebssysteme bzw. Smartphones zu verwenden. Die zu verwendenden APIs sind nicht unbedingt die Neuesten und verlangen bspw. sehr alte Java Versionen ab (bspw. J2ME).
+
+\end{document}
