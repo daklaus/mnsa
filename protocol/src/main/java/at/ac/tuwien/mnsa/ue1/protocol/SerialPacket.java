@@ -131,10 +131,10 @@ public class SerialPacket {
 	public static final byte OFFSET_LNL = 3;
 	public static final byte OFFSET_PY = 4;
 	public static final byte HEADER_LENGTH = OFFSET_PY;
-	
+
 	public static final int MAX_LENGTH = 65535; // 2 bytes = 2^16 - 1
 	public static final byte DEFAULT_NAD = 0x00;
-	
+
 	private static final String STRING_CHARSET = "UTF-8";
 
 	/*
@@ -286,6 +286,9 @@ public class SerialPacket {
 	 * @return a byte array of length two representing the length of the payload
 	 */
 	private byte[] getLengthAsByteArray() {
+		if (payload == null || payload.length <= 0)
+			return new byte[] { 0x00, 0x00 };
+
 		int length = payload.length;
 
 		if (length <= 0)
