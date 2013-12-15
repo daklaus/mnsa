@@ -131,8 +131,11 @@ public class SerialPacket {
 	public static final byte OFFSET_LNL = 3;
 	public static final byte OFFSET_PY = 4;
 	public static final byte HEADER_LENGTH = OFFSET_PY;
+	
 	public static final int MAX_LENGTH = 65535; // 2 bytes = 2^16 - 1
-	private static final String stringCharset = "UTF-8";
+	public static final byte DEFAULT_NAD = 0x00;
+	
+	private static final String STRING_CHARSET = "UTF-8";
 
 	/*
 	 * Fields
@@ -179,7 +182,7 @@ public class SerialPacket {
 
 		byte[] bPayload = new byte[] {};
 		try {
-			bPayload = payload.getBytes(stringCharset);
+			bPayload = payload.getBytes(STRING_CHARSET);
 		} catch (UnsupportedEncodingException e) {
 			// We trust in that the charset constant given in this class is a
 			// valid charset
@@ -334,7 +337,7 @@ public class SerialPacket {
 
 		String ret = null;
 		try {
-			ret = new String(payload, stringCharset);
+			ret = new String(payload, STRING_CHARSET);
 		} catch (UnsupportedEncodingException e) {
 			// We trust in that the charset constant given in this class is a
 			// valid charset
