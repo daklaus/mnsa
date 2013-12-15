@@ -60,11 +60,13 @@ public class ProxyMIDletTest {
 		SerialPacket expectedP = null;
 		try {
 			expectedP = new SerialPacket(SerialPacket.TYPE_APDU,
-					SerialPacket.DEFAULT_NAD);
+					SerialPacket.DEFAULT_NAD, new byte[] { (byte) 0x00,
+							(byte) 0xA4, (byte) 0x04, (byte) 0x00 });
 
 			expectedP.write(outputStream);
 
 			SerialPacket actualP = SerialPacket.readFromStream(inputStream);
+			System.out.println("Got Payload: " + actualP.getPayloadAsString());
 
 		} catch (TooLongPayloadException e) {
 		}

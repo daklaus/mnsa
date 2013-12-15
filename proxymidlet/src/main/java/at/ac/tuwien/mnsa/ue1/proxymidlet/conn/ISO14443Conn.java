@@ -16,7 +16,7 @@ public class ISO14443Conn implements TargetListener {
 
 	private ISO14443Connection smc;
 	private TargetProperties target;
-	private static final Logger LOG = Logger.getLogger("MainMidlet");
+	private static final Logger LOG = Logger.getLogger("SerialConn");
 
 	public ISO14443Conn() throws ContactlessException {
 		DiscoveryManager dm = DiscoveryManager.getInstance();
