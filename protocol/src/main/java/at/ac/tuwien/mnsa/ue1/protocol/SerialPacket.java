@@ -82,9 +82,8 @@ public class SerialPacket {
 	/**
 	 * Status (MTY=0x02)<br/>
 	 * The request message contains no payload (LNH==LNL==0) and the reply has
-	 * length 4 bytes and denotes big endian integer. It contains values as
-	 * described in the abstract class JCTerminal as legal return values the
-	 * getStatus method. If status is not supported return value 0.
+	 * length 1 byte. The reply payload is 0x01 for status OK and everything
+	 * else for not OK.
 	 */
 	public static final byte TYPE_STATUS = 0x02;
 	/**
