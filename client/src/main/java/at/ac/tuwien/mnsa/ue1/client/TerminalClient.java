@@ -39,8 +39,12 @@ public class TerminalClient {
 
 			// don't care about the protocol (either T=0 or T=1)
 			card = cardTerminal.connect("*");
+			System.out
+					.println("isCardPresent: " + cardTerminal.isCardPresent());
+			// System.out.println("ATR: " + card.getATR());
 		}
-		System.out.println("ATR: " + card.getATR());
+
+		card.disconnect(false);
 	}
 
 }

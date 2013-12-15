@@ -53,7 +53,7 @@ public class NokiaCardTerminal extends CardTerminal {
 	}
 
 	@Override
-	public Card connect(String string) throws CardException {
+	public Card connect(String protocol) throws CardException {
 		if (card == null) {
 			try {
 				serialPort = (SerialPort) CommPortIdentifier.getPortIdentifier(
