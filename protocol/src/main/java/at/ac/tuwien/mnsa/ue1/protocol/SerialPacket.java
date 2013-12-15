@@ -224,7 +224,7 @@ public class SerialPacket {
 	 *             throws the exception
 	 */
 	public static SerialPacket readFromStream(InputStream inStream)
-			throws IOException, TooLongPayloadException {
+			throws IOException {
 		byte[] buffer = new byte[HEADER_LENGTH];
 		readFully(inStream, buffer, 0, HEADER_LENGTH);
 
@@ -238,7 +238,16 @@ public class SerialPacket {
 			payload = new byte[length];
 			readFully(inStream, payload, 0, length);
 		}
-		return new SerialPacket(messageType, nodeAddress, payload);
+
+		SerialPacket p = null;
+		try {
+			p = new SerialPacket(messageType, nodeAddress, payload);
+		} catch (TooLongPayloadException e) {
+			// Cannot happen since we are just reading not more than we can
+			// handle
+		}
+
+		return p;
 	}
 
 	/**

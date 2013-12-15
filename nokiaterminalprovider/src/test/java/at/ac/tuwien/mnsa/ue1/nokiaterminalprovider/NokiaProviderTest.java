@@ -59,26 +59,28 @@ public class NokiaProviderTest {
 			System.out.println("Provider: " + x[i].getName());
 	}
 
-	@Test
-	public void testNokiaProvider() throws NoSuchAlgorithmException,
-			NoSuchProviderException, CardException {
-
-		System.out.println("List of NokiaCardTerminals connected:");
-
-		TerminalFactory tf = TerminalFactory.getInstance("NokiaProvider", prop);
-		CardTerminals cts = tf.terminals();
-		List<CardTerminal> ctl = cts.list();
-
-		Card card = null;
-
-		for (CardTerminal cardTerminal : ctl) {
-			System.out.println("Reader: " + cardTerminal.getName());
-
-			// don't care about the protocol (either T=0 or T=1)
-			card = cardTerminal.connect("*");
-		}
-		System.out.println("ATR: " + card.getATR());
-
-	}
+	// Moved to client module
+	//
+	// @Test
+	// public void testNokiaProvider() throws NoSuchAlgorithmException,
+	// NoSuchProviderException, CardException {
+	//
+	// System.out.println("List of NokiaCardTerminals connected:");
+	//
+	// TerminalFactory tf = TerminalFactory.getInstance("NokiaProvider", prop);
+	// CardTerminals cts = tf.terminals();
+	// List<CardTerminal> ctl = cts.list();
+	//
+	// Card card = null;
+	//
+	// for (CardTerminal cardTerminal : ctl) {
+	// System.out.println("Reader: " + cardTerminal.getName());
+	//
+	// // don't care about the protocol (either T=0 or T=1)
+	// card = cardTerminal.connect("*");
+	// }
+	// System.out.println("ATR: " + card.getATR());
+	//
+	// }
 
 }
