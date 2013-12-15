@@ -11,6 +11,7 @@ import org.junit.experimental.categories.Categories.ExcludeCategory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// TODO Move the tests to the protocol module
 public class SerialPacketTest {
 	Logger log = LoggerFactory.getLogger(SerialPacketTest.class);
 
