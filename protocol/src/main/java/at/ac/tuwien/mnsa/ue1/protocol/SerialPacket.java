@@ -121,6 +121,9 @@ public class SerialPacket {
 	 */
 	public static final byte TYPE_DEBUGINFO = 0x07;
 
+	// TODO Write javadoc
+	public static final byte TYPE_ATR = 0x08;
+
 	/*
 	 * Byte offsets of the fields
 	 */
