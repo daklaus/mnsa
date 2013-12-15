@@ -54,9 +54,6 @@ public class SerialConn implements Runnable {
 			} catch (IOException e) {
 				LOG.print("Error: IOException while reading SerialStream");
 				close();
-			} catch (TooLongPayloadException e) {
-				LOG.print("Error: Too long payload");
-				close();
 			}
 
 			try {
