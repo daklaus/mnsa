@@ -82,9 +82,8 @@ public class SerialPacket {
 	/**
 	 * Status (MTY=0x02)<br/>
 	 * The request message contains no payload (LNH==LNL==0) and the reply has
-	 * length 4 bytes and denotes big endian integer. It contains values as
-	 * described in the abstract class JCTerminal as legal return values the
-	 * getStatus method. If status is not supported return value 0.
+	 * length 1 byte. The reply payload is 0x01 for status OK and everything
+	 * else for not OK.
 	 */
 	public static final byte TYPE_STATUS = 0x02;
 	/**
@@ -224,7 +223,7 @@ public class SerialPacket {
 	 *             throws the exception
 	 */
 	public static SerialPacket readFromStream(InputStream inStream)
-			throws IOException, TooLongPayloadException {
+			throws IOException {
 		byte[] buffer = new byte[HEADER_LENGTH];
 		readFully(inStream, buffer, 0, HEADER_LENGTH);
 
@@ -238,7 +237,16 @@ public class SerialPacket {
 			payload = new byte[length];
 			readFully(inStream, payload, 0, length);
 		}
-		return new SerialPacket(messageType, nodeAddress, payload);
+
+		SerialPacket p = null;
+		try {
+			p = new SerialPacket(messageType, nodeAddress, payload);
+		} catch (TooLongPayloadException e) {
+			// Cannot happen since we are just reading not more than we can
+			// handle
+		}
+
+		return p;
 	}
 
 	/**
