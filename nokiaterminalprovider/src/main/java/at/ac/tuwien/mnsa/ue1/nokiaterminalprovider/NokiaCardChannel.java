@@ -17,14 +17,17 @@ public class NokiaCardChannel extends CardChannel {
 		this.channel = channel;
 	}
 
+	@Override
 	public Card getCard() {
 		return card;
 	}
 
+	@Override
 	public int getChannelNumber() {
 		return channel;
 	}
 
+	@Override
 	public ResponseAPDU transmit(CommandAPDU capdu) throws CardException {
 		return card.transmitCommand(capdu);
 	}
@@ -43,6 +46,7 @@ public class NokiaCardChannel extends CardChannel {
 	/**
 	 * Do nothing.
 	 */
+	@Override
 	public void close() throws CardException {
 
 	}

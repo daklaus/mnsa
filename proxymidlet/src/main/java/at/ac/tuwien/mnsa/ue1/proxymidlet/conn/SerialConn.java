@@ -77,19 +77,18 @@ public class SerialConn implements Runnable {
 						responsePacket = new SerialPacket(
 								SerialPacket.TYPE_APDU,
 								SerialPacket.DEFAULT_NAD, responsePayload);
-						LOG.print("value: " + new String(responsePayload));
+						LOG.print("value: " + SerialPacket.bytesToHex(responsePayload));
 					} else {
-						LOG.print("Switch: ADPU - else responsepacket...");
+						LOG.print("Switch: No response APDU, sending ERROR");
 						responsePacket = new SerialPacket(
 								SerialPacket.TYPE_ERROR,
 								SerialPacket.DEFAULT_NAD);
 					}
 					LOG.print("Switch: Before Sending");
 				} catch (TooLongPayloadException e1) {
-					LOG.print("Switch: ADPU - Error");
+					LOG.print("Switch: TooLongPayloadException");
 				} catch (ContactlessException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOG.print("Switch: ContactlessException");
 				}
 				// TODO
 				break;
@@ -146,6 +145,32 @@ public class SerialConn implements Runnable {
 				// TODO
 				break;
 
+			case SerialPacket.TYPE_ATR:
+				try {
+					LOG.print("Switch: Got type ATR");
+
+					String atr = nfcConnection.getAtr();
+					LOG.print("Switch: Status - got response from nfc card");
+
+					if (atr != null && atr.length() > 0) {
+						LOG.print("Switch: Status - if responsepacket != null");
+						responsePacket = new SerialPacket(
+								SerialPacket.TYPE_ATR,
+								SerialPacket.DEFAULT_NAD, atr);
+						LOG.print("returning ATR value: " + atr);
+					} else {
+						LOG.print("Switch: ATR is null or empty");
+						responsePacket = new SerialPacket(
+								SerialPacket.TYPE_ERROR,
+								SerialPacket.DEFAULT_NAD);
+					}
+					LOG.print("Switch: Before Sending");
+				} catch (TooLongPayloadException e1) {
+					LOG.print("Switch: TooLongPayloadException with ATR");
+				}
+				// TODO
+				break;
+
 			case SerialPacket.TYPE_TERMINFO:
 				// TODO
 				break;
@@ -155,11 +180,19 @@ public class SerialConn implements Runnable {
 			}
 
 			try {
-				if (responsePacket != null) {
-					LOG.print("Sending Packet...");
-					responsePacket.write(outStream);
-					outStream.flush();
+				if (responsePacket == null) {
+					try {
+						responsePacket = new SerialPacket(
+								SerialPacket.TYPE_ERROR,
+								SerialPacket.DEFAULT_NAD);
+					} catch (TooLongPayloadException e) {
+						// Cannot happen since there is no payload
+					}
 				}
+
+				LOG.print("Sending Packet...");
+				responsePacket.write(outStream);
+				outStream.flush();
 			} catch (IOException e) {
 				LOG.print("Error: Sending packet");
 				close();
