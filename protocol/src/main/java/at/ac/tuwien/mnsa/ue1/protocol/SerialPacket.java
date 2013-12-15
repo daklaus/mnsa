@@ -362,8 +362,24 @@ public class SerialPacket {
 	public String toString() {
 		String out = "MTY[" + messageType + "] NAD[" + nodeAddress + "]";
 		if (payload != null && payload.length > 0)
-			out += " LN[" + payload.length + "] PY[" + payload + "]";
+			out += " LN[" + payload.length + "] PY[" + bytesToHex(payload)
+					+ "]";
 		return out;
+	}
+
+	// From
+	// http://stackoverflow.com/questions/9655181/convert-from-byte-array-to-hex-string-in-java
+	private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
+
+	public final static String bytesToHex(byte[] bytes) {
+		char[] hexChars = new char[bytes.length * 2];
+		int v;
+		for (int j = 0; j < bytes.length; j++) {
+			v = bytes[j] & 0xFF;
+			hexChars[j * 2] = hexArray[v >>> 4];
+			hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+		}
+		return new String(hexChars);
 	}
 
 	/**

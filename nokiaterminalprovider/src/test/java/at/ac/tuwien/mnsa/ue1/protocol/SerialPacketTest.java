@@ -30,7 +30,7 @@ public class SerialPacketTest {
 	@After
 	public void tearDown() throws Exception {
 	}
-
+	
 	@Test
 	public void testGetBytes() throws TooLongPayloadException {
 		checkPacketContent(SerialPacket.TYPE_DEBUGINFO, (byte) 0x10, 0x300,
