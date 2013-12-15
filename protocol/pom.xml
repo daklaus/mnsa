@@ -9,6 +9,10 @@
 	<artifactId>protocol</artifactId>
 	<name>USB Communication Protocol</name>
 
+	<properties>
+		<compileSource>1.4</compileSource>
+		<!-- <testCompileSource>1.7</testCompileSource> -->
+	</properties>
 
 	<build>
 		<plugins>
@@ -18,9 +22,23 @@
 				<version>3.1</version>
 
 				<configuration>
-					<source>1.4</source>
-					<target>1.4</target>
+					<source>${compileSource}</source>
+					<target>${compileSource}</target>
 				</configuration>
+
+<!-- 				<executions> -->
+<!-- 					<execution> -->
+<!-- 						<id>test-compile</id> -->
+<!-- 						<phase>process-test-sources</phase> -->
+<!-- 						<goals> -->
+<!-- 							<goal>testCompile</goal> -->
+<!-- 						</goals> -->
+<!-- 						<configuration> -->
+<!-- 							<source>${testCompileSource}</source> -->
+<!-- 							<target>${testCompileSource}</target> -->
+<!-- 						</configuration> -->
+<!-- 					</execution> -->
+<!-- 				</executions> -->
 			</plugin>
 		</plugins>
 	</build>

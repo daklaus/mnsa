@@ -6,11 +6,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
+ * <p>
  * This is a packet. A unit for sending and receiving data over a serial
  * communication to a smart card. This protocol is based on the one found at <a
  * href=
  * "http://www.win.tue.nl/pinpasjc/docs/apis/offcard/com/ibm/jc/terminal/RemoteJCTerminal.html"
- * >this link</a>.
+ * >this link</a>. The packet structure look like the following table:
+ * </p>
  * 
  * <table border="1">
  * <tbody>
@@ -122,66 +124,160 @@ public class SerialPacket {
 	/*
 	 * Byte offsets of the fields
 	 */
-	private static final byte OFFSET_MTY = 0;
-	private static final byte OFFSET_NAD = 1;
-	private static final byte OFFSET_LNH = 2;
-	private static final byte OFFSET_LNL = 3;
-	private static final byte OFFSET_PY = 4;
-	private static final byte HEADER_LENGTH = OFFSET_PY;
+	public static final byte OFFSET_MTY = 0;
+	public static final byte OFFSET_NAD = 1;
+	public static final byte OFFSET_LNH = 2;
+	public static final byte OFFSET_LNL = 3;
+	public static final byte OFFSET_PY = 4;
+	public static final byte HEADER_LENGTH = OFFSET_PY;
+	public static final int MAX_LENGTH = 65535; // 2 bytes = 2^16 - 1
 
-	// TODO Add fields according to the reference
+	/*
+	 * Fields
+	 */
 	private final byte messageType;
 	private final byte nodeAddress;
-	private final short length;
 	private final byte[] payload;
 
-	private SerialPacket(byte messageType, byte nodeAddress, short length,
-			byte[] payload) {
+	/**
+	 * Creates a serial packet for the specified message type and node address
+	 * with the specified payload.
+	 * 
+	 * @param messageType
+	 *            the message type of the packet. For all types see the constant
+	 *            fields of this class beginning with "TYPE_".
+	 * @param nodeAddress
+	 *            the node address of listening process where the package should
+	 *            arrive. Node addresses have to be arranged on your own.
+	 * @param payload
+	 *            the bytes of the payload you want to send with this package.
+	 * @throws TooLongPayloadException
+	 *             If the size of the payload array exceeds the maximum length
+	 *             as defined in {@link #MAX_LENGTH}.
+	 */
+	public SerialPacket(byte messageType, byte nodeAddress, byte[] payload)
+			throws TooLongPayloadException {
+		if (payload != null && payload.length >= MAX_LENGTH)
+			throw new TooLongPayloadException(payload.length);
+
 		this.messageType = messageType;
 		this.nodeAddress = nodeAddress;
-		this.length = length;
 		this.payload = payload;
 	}
 
-	public SerialPacket(byte messageType, byte nodeAddress) {
-		this(messageType, nodeAddress, (short) 0, null);
+	/**
+	 * Used for zero payload. For the parameters see
+	 * {@link #SerialPacket(byte, byte, byte[])}
+	 * 
+	 * @throws TooLongPayloadException
+	 *             If and only if {@link #SerialPacket(byte, byte, byte[])}
+	 *             throws the exception
+	 * 
+	 * @see {@link #SerialPacket(byte, byte, byte[])}
+	 */
+	public SerialPacket(byte messageType, byte nodeAddress)
+			throws TooLongPayloadException {
+		this(messageType, nodeAddress, null);
 	}
 
+	/**
+	 * Reads the contents of a serial packet from an input stream and creates a
+	 * SerialPacket from it. This method <strong>blocks</strong> until there are
+	 * all the bytes of the packet present on the stream (at least the bytes of
+	 * the header if the payload length is zero).
+	 * 
+	 * @param inStream
+	 *            the stream to be read from
+	 * @return a SerialPacket class with the contents from the stream
+	 * @throws IOException
+	 * @throws TooLongPayloadException
+	 *             If and only if {@link #SerialPacket(byte, byte, byte[])}
+	 *             throws the exception
+	 */
 	public static SerialPacket readFromStream(InputStream inStream)
-			throws IOException {
+			throws IOException, TooLongPayloadException {
 		byte[] buffer = new byte[HEADER_LENGTH];
 		readFully(inStream, buffer, 0, HEADER_LENGTH);
 
 		byte messageType = buffer[OFFSET_MTY];
 		byte nodeAddress = buffer[OFFSET_NAD];
-		// TODO Check if it this calculation is correct
-		short length = (short) (buffer[OFFSET_LNH] * 256 + buffer[OFFSET_LNL]);
+		int length = getIntFromUnsignedShortBytes(buffer[OFFSET_LNH],
+				buffer[OFFSET_LNL]);
 
 		byte[] payload = null;
 		if (length > 0) {
 			payload = new byte[length];
 			readFully(inStream, payload, 0, length);
 		}
-		return new SerialPacket(messageType, nodeAddress, length, payload);
+		return new SerialPacket(messageType, nodeAddress, payload);
 	}
 
-	// TODO Write javadoc
+	/**
+	 * Returns the whole packet as a byte array
+	 * 
+	 * @return the package as a byte array
+	 */
 	public byte[] getBytes() {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		try {
 			this.write(os);
 		} catch (IOException e) {
-			// This cannot happen since we are just using an in memory stream
+			// This cannot happen since we are just using an in-memory stream
 		}
 		return os.toByteArray();
 	}
 
-	// TODO Write javadoc
+	/**
+	 * Writes the packet out in a stream
+	 * 
+	 * @param outStream
+	 *            the stream to which the packet will be written
+	 * @throws IOException
+	 *             If and only if {@link java.io.OutputStream#write(int)} throws
+	 *             the exception
+	 */
 	public void write(OutputStream outStream) throws IOException {
 		outStream.write(messageType);
-		outStream.write(length);
-		if (length > 0)
-			outStream.write(payload, 0, length);
+		outStream.write(nodeAddress);
+
+		byte[] length = getLengthAsByteArray();
+		outStream.write(length[0]);
+		outStream.write(length[1]);
+
+		if (payload != null && payload.length > 0)
+			outStream.write(payload, 0, payload.length);
+	}
+
+	/**
+	 * Get the length of the payload as a byte array with the length 2. The two
+	 * bytes can be interpreted as an unsigned short.
+	 * 
+	 * @return a byte array of length two representing the length of the payload
+	 */
+	private byte[] getLengthAsByteArray() {
+		int length = payload.length;
+
+		if (length <= 0)
+			return new byte[] { 0x00, 0x00 };
+
+		byte[] ret = new byte[2];
+		ret[0] = (byte) ((length & 0x0000ff00) >>> 8);
+		ret[1] = (byte) ((length) & 0x000000ff);
+		return ret;
+	}
+
+	/**
+	 * Returns the number assembled from the high and low byte of a short
+	 * interpreted as unsigned number.
+	 * 
+	 * @param lnh
+	 *            the high byte of the short
+	 * @param lnl
+	 *            the low byte of the short
+	 * @return the integer of the interpreted short
+	 */
+	public static int getIntFromUnsignedShortBytes(byte lnh, byte lnl) {
+		return ((lnh & 0x000000ff) << 8) + (lnl & 0x000000ff);
 	}
 
 	public byte getMessageType() {
@@ -192,8 +288,10 @@ public class SerialPacket {
 		return nodeAddress;
 	}
 
-	public short getLength() {
-		return length;
+	public int getLength() {
+		if (payload == null)
+			return 0;
+		return payload.length;
 	}
 
 	public byte[] getPayload() {
@@ -201,8 +299,10 @@ public class SerialPacket {
 	}
 
 	public String toString() {
-		return "MTY[" + messageType + "] NAD[" + nodeAddress + "] LN[" + length
-				+ "] PY[" + payload + "]";
+		String out = "MTY[" + messageType + "] NAD[" + nodeAddress + "]";
+		if (payload != null && payload.length > 0)
+			out += " LN[" + payload.length + "] PY[" + payload + "]";
+		return out;
 	}
 
 	/**
@@ -210,15 +310,17 @@ public class SerialPacket {
 	 * the length
 	 * 
 	 * @param inStream
-	 *            The stream to be read from
+	 *            the stream to be read from
 	 * @param output
-	 *            The array where to be written
+	 *            the array where to be written
 	 * @param offset
-	 *            An offset in the stream and output array
+	 *            an offset in the stream and output array
 	 * @param length
-	 *            The number of bytes to be read
+	 *            the number of bytes to be read
 	 * @throws IOException
-	 *             if and only if java.io.InputStream.read
+	 *             If and only if
+	 *             {@link java.io.InputStream#read(byte[], int, int)} throws the
+	 *             exception
 	 */
 	private static void readFully(InputStream inStream, byte[] output,
 			int offset, int length) throws IOException {
