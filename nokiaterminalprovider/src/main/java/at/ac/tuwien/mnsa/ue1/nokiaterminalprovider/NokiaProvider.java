@@ -13,7 +13,7 @@ public class NokiaProvider extends Provider {
     public static final String PROVIDER_NAME = "NokiaProvider";
     public static final double PROVIDER_VERSION = 1.0d;
     public static final String PROVIDER_INFO = "Nokia Phone Terminal Provider";
-	public static final Class<? extends TerminalFactorySpi> FACTORY_SPI_CLASS = NokiaFactorySpi.class;
+	public static final Class<? extends TerminalFactorySpi> FACTORY_SPI_CLASS = NokiaTerminalFactorySpi.class;
 	
 	
     public NokiaProvider() {
