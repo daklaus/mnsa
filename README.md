@@ -1,4 +1,4 @@
-mnsa_ue1
-========
+(M)NSA
+======
 
-Exercise 1 of the course (Mobile) Network Services and Applications in the winter term 2013/14
+The exercises of the course (Mobile) Network Services and Applications in the winter term 2013/14
