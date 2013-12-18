@@ -1,0 +1,26 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>at.ac.tuwien.mnsa.ue2</groupId>
+		<artifactId>root</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+	<artifactId>jcardcalc</artifactId>
+	<name>Java Card Calculator</name>
+
+	<repositories>
+		<repository>
+			<id>lib</id>
+			<url>${project.baseUri}/lib</url>
+		</repository>
+	</repositories>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.licel</groupId>
+			<artifactId>jcardsim</artifactId>
+			<version>2.2.1</version>
+		</dependency>
+	</dependencies>
+</project>
