@@ -53,38 +53,47 @@ public class JCardCalcTest {
 
 	@Test
 	public void testAdd() {
-		// TODO Write tests like testNop; mind 10 per test method; cover all
-		// cases; maybe log something with static logger LOG
+		// -5 + 2 = -3
+		assertCalcResponse(JCardCalc.ADD, (byte) 0xfb, (byte) 0x02, new byte[] {
+				(byte) 0xff, (byte) 0xfd }, SW_OK);
+		// TODO Write tests like the one in testAdd; mind 10 per test method;
+		// cover all
+		// cases; for negative numbers use the two's complement
 	}
 
 	@Test
 	public void testSub() {
-		// TODO Write tests like testNop; mind 10 per test method; cover all
-		// cases; maybe log something with static logger LOG
+		// TODO Write tests like the one in testAdd; mind 10 per test method;
+		// cover all
+		// cases; for negative numbers use the two's complement
 	}
 
 	@Test
 	public void testMul() {
-		// TODO Write tests like testNop; mind 10 per test method; cover all
-		// cases; maybe log something with static logger LOG
+		// TODO Write tests like the one in testAdd; mind 10 per test method;
+		// cover all
+		// cases; for negative numbers use the two's complement
 	}
 
 	@Test
 	public void testAnd() {
-		// TODO Write tests like testNop; mind 10 per test method; cover all
-		// cases; maybe log something with static logger LOG
+		// TODO Write tests like the one in testAdd; mind 10 per test method;
+		// cover all
+		// cases; for negative numbers use the two's complement
 	}
 
 	@Test
 	public void testOr() {
-		// TODO Write tests like testNop; mind 10 per test method; cover all
-		// cases; maybe log something with static logger LOG
+		// TODO Write tests like the one in testAdd; mind 10 per test method;
+		// cover all
+		// cases; for negative numbers use the two's complement
 	}
 
 	@Test
 	public void testNot() {
-		// TODO Write tests like testNop; mind 10 per test method; cover all
-		// cases; maybe log something with static logger LOG
+		// TODO Write tests like the one in testAdd; mind 10 per test method;
+		// cover all
+		// cases; for negative numbers use the two's complement
 	}
 
 	private void assertCalcResponse(byte ins, byte p1, byte p2,
