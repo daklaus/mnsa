@@ -133,7 +133,7 @@ public class JCardCalcTest {
 		assertCalcResponse(JCardCalc.SUB, (byte) 0x00, (byte) 0x00, new byte[] {
 				(byte) 0x00, (byte) 0x00 }, SW_OK);
 
-		// Dez: 25 - 26 = -1 Hex: 19 - 1A = FF  (Two's complement)
+		// Dez: 25 - 26 = -1 Hex: 19 - 1A = FF (Two's complement)
 		assertCalcResponse(JCardCalc.SUB, (byte) 0x19, (byte) 0x1A, new byte[] {
 				(byte) 0xFF, (byte) 0xFF }, SW_OK);
 
@@ -157,9 +157,45 @@ public class JCardCalcTest {
 		LOG.info("testMul:");
 		LOG.info("========");
 
-		// TODO Write tests like the one in testAdd; mind 10 per test method;
-		// cover all
-		// cases; for negative numbers use the two's complement
+		// Dez: 5 * 4 = 20 Hex: 05 * 04 = 14
+		assertCalcResponse(JCardCalc.MUL, (byte) 0x05, (byte) 0x04, new byte[] {
+				(byte) 0x00, (byte) 0x14 }, SW_OK);
+
+		// Dez: 6 * -10 = -60 Hex: 06 * F6 = C4 (Two's complement)
+		assertCalcResponse(JCardCalc.MUL, (byte) 0x06, (byte) 0xF6, new byte[] {
+				(byte) 0xFF, (byte) 0xC4 }, SW_OK);
+
+		// Dez: -7 * 14 = -98 Hex: F9 * 0E = 9E (Two's complement)
+		assertCalcResponse(JCardCalc.MUL, (byte) 0xF9, (byte) 0x0E, new byte[] {
+				(byte) 0xFF, (byte) 0x9E }, SW_OK);
+
+		// Dez: -46 * -3 = 138 Hex: D2 * FD = 8A (Two's complement)
+		assertCalcResponse(JCardCalc.MUL, (byte) 0xD2, (byte) 0xFD, new byte[] {
+				(byte) 0x00, (byte) 0x8A }, SW_OK);
+
+		// Dez: 45 * 63 = 2835 Hex: 2D * 3F = 0B13
+		assertCalcResponse(JCardCalc.MUL, (byte) 0x2D, (byte) 0x3F, new byte[] {
+				(byte) 0x0B, (byte) 0x13 }, SW_OK);
+
+		// Dez: 127 * 127 = 16129 Hex: 7F * 7F = 3F01
+		assertCalcResponse(JCardCalc.MUL, (byte) 0x7F, (byte) 0x7F, new byte[] {
+				(byte) 0x3F, (byte) 0x01 }, SW_OK);
+
+		// Dez: -128 * -128 = 16384 Hex: 80 * 80 = 4000 (Two's complement)
+		assertCalcResponse(JCardCalc.MUL, (byte) 0x80, (byte) 0x80, new byte[] {
+				(byte) 0x40, (byte) 0x00 }, SW_OK);
+
+		// Dez: 0 * 0 = 0 Hex: 00 * 00 = 00
+		assertCalcResponse(JCardCalc.MUL, (byte) 0x00, (byte) 0x00, new byte[] {
+				(byte) 0x00, (byte) 0x00 }, SW_OK);
+
+		// Dez: 0 * 127 = 0 Hex: 00 * 7F = 00
+		assertCalcResponse(JCardCalc.MUL, (byte) 0x00, (byte) 0x7F, new byte[] {
+				(byte) 0x00, (byte) 0x00 }, SW_OK);
+
+		// Dez: -128 * 127 = -16256 Hex: 80 * 7F = C080 (Two's complement)
+		assertCalcResponse(JCardCalc.MUL, (byte) 0x80, (byte) 0x7F, new byte[] {
+				(byte) 0xC0, (byte) 0x80 }, SW_OK);
 
 		LOG.info(" ");
 	}
