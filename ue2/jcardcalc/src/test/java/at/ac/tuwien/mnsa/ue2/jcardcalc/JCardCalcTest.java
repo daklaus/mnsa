@@ -27,6 +27,8 @@ public class JCardCalcTest {
 	private static final Class<? extends Applet> CLAZZ = JCardCalc.class;
 
 	private static final byte[] SW_OK = new byte[] { (byte) 0x90, (byte) 0x00 };
+	private static final byte[] SW_UNKNOWN = new byte[] { (byte) 0x6D,
+			(byte) 0x00 };
 	private static final byte[] ZERO_RESPONSE = new byte[] { 0x00, 0x00 };
 	private static final byte ZERO = 0x00;
 
@@ -205,9 +207,45 @@ public class JCardCalcTest {
 		LOG.info("testAnd:");
 		LOG.info("========");
 
-		// TODO Write tests like the one in testAdd; mind 10 per test method;
-		// cover all
-		// cases; for negative numbers use the two's complement
+		// Dez: 15 AND 15 = 15 Hex: F AND F = F
+		assertCalcResponse(JCardCalc.AND, (byte) 0x0F, (byte) 0x0F, new byte[] {
+				(byte) 0x00, (byte) 0x0F }, SW_OK);
+
+		// Dez: 127 AND 65 = 65 Hex: 7F AND 41 = 41
+		assertCalcResponse(JCardCalc.AND, (byte) 0x7F, (byte) 0x41, new byte[] {
+				(byte) 0x00, (byte) 0x41 }, SW_OK);
+
+		// Dez: -128 AND 127 = 0 Hex: 128 AND 7F = 00 (Two's complement)
+		assertCalcResponse(JCardCalc.AND, (byte) 0x80, (byte) 0x7F, new byte[] {
+				(byte) 0x00, (byte) 0x00 }, SW_OK);
+
+		// Dez: 0 AND 0 = 0 Hex: 00 AND 00 = 00
+		assertCalcResponse(JCardCalc.AND, (byte) 0x00, (byte) 0x00, new byte[] {
+				(byte) 0x00, (byte) 0x00 }, SW_OK);
+
+		// Dez: 127 AND 5 = 5 Hex: 7F AND 05 = 05
+		assertCalcResponse(JCardCalc.AND, (byte) 0x7F, (byte) 0x05, new byte[] {
+				(byte) 0x00, (byte) 0x05 }, SW_OK);
+
+		// Dez: 20 AND 48 = 16 Hex: 14 AND 30 = 10
+		assertCalcResponse(JCardCalc.AND, (byte) 0x14, (byte) 0x30, new byte[] {
+				(byte) 0x00, (byte) 0x10 }, SW_OK);
+
+		// Dez: 18 AND 4 = 0 Hex: 12 AND 04 = 00
+		assertCalcResponse(JCardCalc.AND, (byte) 0x12, (byte) 0x04, new byte[] {
+				(byte) 0x00, (byte) 0x00 }, SW_OK);
+
+		// Dez: -61 AND 7 = 3 Hex: C3 AND 07 = 03 (Two's complement)
+		assertCalcResponse(JCardCalc.AND, (byte) 0xC3, (byte) 0x07, new byte[] {
+				(byte) 0x00, (byte) 0x03 }, SW_OK);
+
+		// Dez: -47 AND -69 = 65 Hex: D1 AND BB = 91 (Two's complement)
+		assertCalcResponse(JCardCalc.AND, (byte) 0xD1, (byte) 0xBB, new byte[] {
+				(byte) 0xFF, (byte) 0x91 }, SW_OK);
+
+		// Dez: -54 AND -37 = -54 Hex: CA AND DB = CA (Two's complement)
+		assertCalcResponse(JCardCalc.AND, (byte) 0xCA, (byte) 0xDB, new byte[] {
+				(byte) 0xFF, (byte) 0xCA }, SW_OK);
 
 		LOG.info(" ");
 	}
@@ -217,9 +255,45 @@ public class JCardCalcTest {
 		LOG.info("testOr:");
 		LOG.info("========");
 
-		// TODO Write tests like the one in testAdd; mind 10 per test method;
-		// cover all
-		// cases; for negative numbers use the two's complement
+		// Dez: 15 OR 15 = 15 Hex: F OR F = F
+		assertCalcResponse(JCardCalc.OR, (byte) 0x0F, (byte) 0x0F, new byte[] {
+				(byte) 0x00, (byte) 0x0F }, SW_OK);
+
+		// Dez: 127 OR 65 = 127 Hex: 7F OR 41 = 7F
+		assertCalcResponse(JCardCalc.OR, (byte) 0x7F, (byte) 0x41, new byte[] {
+				(byte) 0x00, (byte) 0x7F }, SW_OK);
+
+		// Dez: -128 OR 127 = -1 Hex: 128 OR 7F = FF (Two's complement)
+		assertCalcResponse(JCardCalc.OR, (byte) 0x80, (byte) 0x7F, new byte[] {
+				(byte) 0xFF, (byte) 0xFF }, SW_OK);
+
+		// Dez: 0 OR 0 = 0 Hex: 00 OR 00 = 00
+		assertCalcResponse(JCardCalc.OR, (byte) 0x00, (byte) 0x00, new byte[] {
+				(byte) 0x00, (byte) 0x00 }, SW_OK);
+
+		// Dez: 127 OR 5 = 127 Hex: 7F OR 05 = 7F
+		assertCalcResponse(JCardCalc.OR, (byte) 0x7F, (byte) 0x05, new byte[] {
+				(byte) 0x00, (byte) 0x7F }, SW_OK);
+
+		// Dez: 20 OR 48 = 52 Hex: 14 OR 30 = 34
+		assertCalcResponse(JCardCalc.OR, (byte) 0x14, (byte) 0x30, new byte[] {
+				(byte) 0x00, (byte) 0x34 }, SW_OK);
+
+		// Dez: 18 OR 4 = 22 Hex: 12 OR 04 = 16
+		assertCalcResponse(JCardCalc.OR, (byte) 0x12, (byte) 0x04, new byte[] {
+				(byte) 0x00, (byte) 0x16 }, SW_OK);
+
+		// Dez: -61 OR 7 = -57 Hex: C3 OR 07 = C7 (Two's complement)
+		assertCalcResponse(JCardCalc.OR, (byte) 0xC3, (byte) 0x07, new byte[] {
+				(byte) 0xFF, (byte) 0xC7 }, SW_OK);
+
+		// Dez: -47 OR -69 = -5 Hex: D1 OR BB = FB (Two's complement)
+		assertCalcResponse(JCardCalc.OR, (byte) 0xD1, (byte) 0xBB, new byte[] {
+				(byte) 0xFF, (byte) 0xFB }, SW_OK);
+
+		// Dez: -54 OR -37 = -37 Hex: CA OR DB = DB (Two's complement)
+		assertCalcResponse(JCardCalc.OR, (byte) 0xCA, (byte) 0xDB, new byte[] {
+				(byte) 0xFF, (byte) 0xDB }, SW_OK);
 
 		LOG.info(" ");
 	}
@@ -229,9 +303,93 @@ public class JCardCalcTest {
 		LOG.info("testNot:");
 		LOG.info("========");
 
-		// TODO Write tests like the one in testAdd; mind 10 per test method;
-		// cover all
-		// cases; for negative numbers use the two's complement
+		// Dez: NOT 12 = -13 Hex: NOT 0C = F3 (Two's complement)
+		assertCalcResponse(JCardCalc.NOT, (byte) 0x0C, (byte) 0x00, new byte[] {
+				(byte) 0xFF, (byte) 0xF3 }, SW_OK);
+
+		// Dez: NOT 0 = -1 Hex: NOT 00 = FF (Two's complement)
+		assertCalcResponse(JCardCalc.NOT, (byte) 0x00, (byte) 0x00, new byte[] {
+				(byte) 0xFF, (byte) 0xFF }, SW_OK);
+
+		// Dez: NOT 1 = -2 Hex: NOT 01 = FE (Two's complement)
+		assertCalcResponse(JCardCalc.NOT, (byte) 0x01, (byte) 0x00, new byte[] {
+				(byte) 0xFF, (byte) 0xFE }, SW_OK);
+
+		// Dez: NOT 127 = -128 Hex: NOT 7F = 80 (Two's complement)
+		assertCalcResponse(JCardCalc.NOT, (byte) 0x7F, (byte) 0x00, new byte[] {
+				(byte) 0xFF, (byte) 0x80 }, SW_OK);
+
+		// Dez: NOT -128 = 127 Hex: NOT 80 = 7F (Two's complement)
+		assertCalcResponse(JCardCalc.NOT, (byte) 0x80, (byte) 0x00, new byte[] {
+				(byte) 0x00, (byte) 0x7F }, SW_OK);
+
+		// Dez: NOT -1 = 0 Hex: NOT FF = 00 (Two's complement)
+		assertCalcResponse(JCardCalc.NOT, (byte) 0xFF, (byte) 0x00, new byte[] {
+				(byte) 0x00, (byte) 0x00 }, SW_OK);
+
+		// Dez: NOT 7 = -8 Hex: NOT 07 = F8 (Two's complement)
+		assertCalcResponse(JCardCalc.NOT, (byte) 0x07, (byte) 0x00, new byte[] {
+				(byte) 0xFF, (byte) 0xF8 }, SW_OK);
+
+		// Dez: NOT -2 = 1 Hex: NOT FE = 01 (Two's complement)
+		assertCalcResponse(JCardCalc.NOT, (byte) 0xFE, (byte) 0x00, new byte[] {
+				(byte) 0x00, (byte) 0x01 }, SW_OK);
+
+		// Dez: NOT -80 = 79 Hex: NOT B0 = 4F (Two's complement)
+		assertCalcResponse(JCardCalc.NOT, (byte) 0xB0, (byte) 0x00, new byte[] {
+				(byte) 0x00, (byte) 0x4F }, SW_OK);
+
+		// Dez: NOT -27 = 26 Hex: NOT E5 = 1A (Two's complement)
+		assertCalcResponse(JCardCalc.NOT, (byte) 0xE5, (byte) 0x00, new byte[] {
+				(byte) 0x00, (byte) 0x1A }, SW_OK);
+
+		LOG.info(" ");
+	}
+
+	@Test
+	public void testUnsupportedInstructions() {
+		LOG.info("testUnsupportedInstructions:");
+		LOG.info("============================");
+
+		// Instruction: 0x09 --> Not supported --> Response: SW1=6D, SW2=00
+		assertCalcResponse((byte) 0x09, (byte) 0x00, (byte) 0x00,
+				"".getBytes(), SW_UNKNOWN);
+
+		// Instruction: 0xA0 --> Not supported --> Response: SW1=6D, SW2=00
+		assertCalcResponse((byte) 0xA0, (byte) 0x00, (byte) 0x00,
+				"".getBytes(), SW_UNKNOWN);
+
+		// Instruction: 0xB7 --> Not supported --> Response: SW1=6D, SW2=00
+		assertCalcResponse((byte) 0xB7, (byte) 0x00, (byte) 0x00,
+				"".getBytes(), SW_UNKNOWN);
+
+		// Instruction: 0xC3 --> Not supported --> Response: SW1=6D, SW2=00
+		assertCalcResponse((byte) 0xC3, (byte) 0x00, (byte) 0x00,
+				"".getBytes(), SW_UNKNOWN);
+
+		// Instruction: 0xD4 --> Not supported --> Response: SW1=6D, SW2=00
+		assertCalcResponse((byte) 0xD4, (byte) 0x00, (byte) 0x00,
+				"".getBytes(), SW_UNKNOWN);
+
+		// Instruction: 0xE8 --> Not supported --> Response: SW1=6D, SW2=00
+		assertCalcResponse((byte) 0xE8, (byte) 0x00, (byte) 0x00,
+				"".getBytes(), SW_UNKNOWN);
+
+		// Instruction: 0xF2 --> Not supported --> Response: SW1=6D, SW2=00
+		assertCalcResponse((byte) 0xF2, (byte) 0x00, (byte) 0x00,
+				"".getBytes(), SW_UNKNOWN);
+
+		// Instruction: 0xCF --> Not supported --> Response: SW1=6D, SW2=00
+		assertCalcResponse((byte) 0xCF, (byte) 0x00, (byte) 0x00,
+				"".getBytes(), SW_UNKNOWN);
+
+		// Instruction: 0xAA --> Not supported --> Response: SW1=6D, SW2=00
+		assertCalcResponse((byte) 0xAA, (byte) 0x00, (byte) 0x00,
+				"".getBytes(), SW_UNKNOWN);
+
+		// Instruction: 0x63 --> Not supported --> Response: SW1=6D, SW2=00
+		assertCalcResponse((byte) 0x63, (byte) 0x00, (byte) 0x00,
+				"".getBytes(), SW_UNKNOWN);
 
 		LOG.info(" ");
 	}
@@ -253,7 +411,9 @@ public class JCardCalcTest {
 		ResponseAPDU response = new ResponseAPDU(bResponse);
 
 		LOG.info("Expected: " + bytesToHex(expectedResponseData)
-				+ "; Response: " + bytesToHex(response.getData()));
+				+ "; Response: " + bytesToHex(response.getData()) + "; SW1: "
+				+ bytesToHex((byte) response.getSW1()) + "; SW2: "
+				+ bytesToHex((byte) response.getSW2()));
 
 		assertArrayEquals(expectedResponseData, response.getData());
 		assertEquals(expectedResponseSW[0], (byte) response.getSW1());
