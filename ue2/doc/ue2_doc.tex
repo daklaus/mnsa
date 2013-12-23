@@ -1,0 +1,171 @@
+\documentclass[paper=a4, fontsize=11pt]{scrartcl}
+\usepackage[svgnames]{xcolor}
+\usepackage[a4paper,pdftex]{geometry}
+
+\usepackage[german]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+\usepackage{fullpage}
+\usepackage{fancyhdr}
+
+%\usepackage{inconsolata}
+
+\usepackage{color}
+
+\definecolor{pblue}{rgb}{0.13,0.13,1}
+\definecolor{pgreen}{rgb}{0,0.5,0}
+\definecolor{pred}{rgb}{0.9,0,0}
+\definecolor{pgrey}{rgb}{0.46,0.45,0.48}
+
+\usepackage{listings}
+\lstset{language=Java,
+  showspaces=false,
+  showtabs=false,
+  breaklines=true,
+  showstringspaces=false,
+  breakatwhitespace=true,
+  commentstyle=\color{pgreen},
+  keywordstyle=\color{pblue},
+  stringstyle=\color{pred},
+  basicstyle=\ttfamily,
+  moredelim=[il][\textcolor{pgrey}]{$$},
+  moredelim=[is][\textcolor{pgrey}]{\%\%}{\%\%}
+}
+
+% ------------------------------------------------------------------------------
+% Header and Footer Setup
+% ------------------------------------------------------------------------------
+\pagestyle{fancy}
+	\fancyhead[L]{INSO - Industrial Software\\ \small{Institut für Rechnergestützte Automation | Fakultät für Informatik | Technische Universität Wien}}
+	\fancyhead[C]{}
+	\fancyhead[R]{}
+	\fancyfoot[L]{JavaCard Taschenrechner} % Title
+	\fancyfoot[C]{}
+	\fancyfoot[R]{Seite \thepage}
+	\renewcommand{\headrulewidth}{1pt}
+	\renewcommand{\footrulewidth}{1pt}
+\setlength{\headheight}{0.5cm}
+\setlength{\headsep}{0.75cm}
+
+\usepackage{hyperref}
+	\hypersetup{
+		colorlinks,
+		citecolor=black,
+		filecolor=black,
+		linkcolor=black,
+		urlcolor=black
+	}
+
+\usepackage{pdfpages}
+
+\usepackage[babel,german=quotes]{csquotes}
+
+% ------------------------------------------------------------------------------
+% Title Setup
+% ------------------------------------------------------------------------------
+\newcommand{\HRule}[1]{\rule{\linewidth}{#1}}
+
+\makeatletter
+\def\printtitle{%
+	{\centering \@title\par}}
+\makeatother
+
+\makeatletter
+\def\printauthor{%
+	{\centering \normalsize \@author}}
+\makeatother
+
+
+\title{	\normalsize Erstellung eines JavaCard Taschenrechners% Subtitle of the document
+	\\[2.0cm] \HRule{0.5pt} \\
+	\LARGE \textbf{\uppercase{Dokumentation Übung 2}} % Title
+	\HRule{2pt} \\[1.5cm]
+	\normalsize Wien am \today \\
+	\normalsize Technische Universität Wien \\[1.0cm]
+	\normalsize ausgeführt im Rahmen der Lehrveranstaltung \\
+	\LARGE 183.286 – (Mobile) Network Service Applications
+}
+
+
+\author{
+	Gruppe 37 \\[2.0cm]
+	Klaus Krapfenbauer \\
+	0926457 \\
+	E 066 937 \\
+	Software Engineering and Internet Computing \\[2.0cm]
+	Christian Ohrfandl \\
+	0926341 \\
+	E 066 937 \\
+	Software Engineering and Internet Computing \\[2.0cm]
+}
+
+\begin{document}
+% ------------------------------------------------------------------------------
+% Title Page
+% ------------------------------------------------------------------------------
+\thispagestyle{empty} % Remove page numbering on this page
+\printtitle
+	\vfill
+\printauthor
+
+% ------------------------------------------------------------------------------
+% Table of Contents
+% ------------------------------------------------------------------------------
+\newpage
+\tableofcontents
+
+% ------------------------------------------------------------------------------
+% Document
+% ------------------------------------------------------------------------------
+\newpage
+
+\section{Kurzfassung}
+Erstellung eines JavaCard Applets (für den Emulator), mit dem einfache Berechnungen durchgeführt werden können.
+
+\section{Einleitung}
+Ziel dieser Übung war es, einen Taschenrechner als JavaCard Applet, aufbauend auf dem SDK für JavaCard, zu implementieren. Im, durch das JavaCard SDK bereitgestellten, Emulator soll die Anwendung anfänglich getestet werden. Anschließend sollen jedoch Unit-Tests entwickelt werden, um die Funktionalität der Anwendung sicherzustellen.
+
+\section{Problemstellung / Zielsetzung}
+Generell wurde diese Übung wie folgt fertiggestellt:
+\begin{enumerate}
+\item Studium einschlägiger Literatur (von LVA Leitung bereitgestellt)
+\item Erstellen der Klassen "`JCardCalc"' und "`JCardCalcTest"'
+\item Implementierung des Protokolls und der gewünschten Funktionen des Taschenrechners (Addition, Subtraktion, Multiplikation, Logisches AND/OR/NOT)
+\item Erstellung der Test-Fälle in Form von Unit-Tests
+\end{enumerate}
+
+\section{Technischer Aufbau}
+Generell haben wir das Projekt mit Hilfe von Maven erstellt. Wie bereits erwähnt, besteht diese Lösung aus zwei Klassen, welche folgend näher vorgestellt werden.
+
+\subsection{"'JCardCalc"'-Klasse}
+In dieser Klasse befindet sich die Logik des JavaCard Applets. Sie empfängt APDUs und verarbeitet sie. Je nach INS Feld der APDU (siehe Protokolldefinition der LVA Leitung) führt das Applet eine bestimmte mathematische Operation durch. Nach erfolgreicher Berechnung sendet das Applet ein Response, welches das Ergebnis der Berechnung beinhält, zurück.
+
+Für die Implementierung der Logik wurden im Speziellen folgende Klassen verwendet:
+\begin{lstlisting}
+import javacard.framework.APDU;
+import javacard.framework.ISO7816;
+import javacard.framework.Applet;
+import javacard.framework.ISOException;
+\end{lstlisting}
+
+\subsection{"'JCardCalcTest"'-Klasse}
+Diese Klasse enthält die Unit-Tests für die effiziente Überprüfung der Logik des Applets. Hierbei haben wir im Speziellen auf folgende Bibliothek zugegriffen (Maven dependency):
+\begin{lstlisting}
+import com.licel.jcardsim.base.Simulator;
+\end{lstlisting}
+Diese Bibliothek ermöglicht das schnelle und effiziente Testen der Logik aus "`JCardCalc"', indem sie die Funktion des "`Emulators"' übernimmt.
+
+Die wesentliche Aufgabe dieser Testklasse liegt jedoch im Senden von APDU-Commands an das Applet. Hierfür ist es sehr wichtig, die Umwandlung von Zahlen zwischen gewissen Zahlensystemen (HEX, DEZ, Binär) zu studieren, da für die Übertragung Bytes eingesetzt werden. Hilfreich ist die Verwendung von Zahlen-Convertern (bspw. die "`Programmierer"'-Ansicht des Standard-Taschenrechners von Windows 7).
+
+\section{Resultat}
+Unsere Gruppe konnte alle Anforderungen erfolgreich implementieren (siehe Unit-Tests).
+
+\section{Installation}
+Das Projekt wird über Maven verwaltet. Es ist keine weitere Konfiguration nötig. Der Befehl "`maven package"' erstellt das Projekt.
+
+\section{Erkenntnisse}
+Im Vergleich zu Übung 1 war dieses Projekt wesentlich leichter und schneller zu lösen. Dies liegt vor allem an der Tatsache, dass für das Testen des Programms ein Emulator verwendet werden konnte und nicht auf das Mobiltelefon deployed werden musste.
+Unserer Meinung nach lag die einzige "`Schwierigkeit"' in der Umwandlung der Zahlensysteme.
+\end{document}
