@@ -21,7 +21,7 @@
 			<groupId>com.licel</groupId>
 			<artifactId>jcardsim</artifactId>
 			<version>2.2.1</version>
-			<scope>test</scope>
+			<!--<scope>test</scope>-->
 		</dependency>
 	</dependencies>
 </project>
