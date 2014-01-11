@@ -26,20 +26,34 @@ public class NumberConverter {
 	 * >stackoverflow.com</a>
 	 */
 	public static final byte[] hexToBytes(String s) {
-		// There is no checking in this method. It should only be used if you
-		// know what you are doing.
-		// TODO Abort if length < 1
-		// TODO Check the characters (what does Character.digit(.) do with
-		// invalid ones?)
+		if (s == null)
+			throw new IllegalArgumentException("Input string is null");
 
-		// TODO Extend for calculation on odd lenghts of the string (add
-		// preceding 0x0)
+		s = s.replaceAll("\\s|_", "").replaceAll("(^0x|h$)", "");
+		if (s.length() < 1)
+			throw new IllegalArgumentException("Input number is empty: " + s);
 
 		int len = s.length();
+		if (len % 2 != 0) {
+			s = "0" + s;
+			len++;
+		}
+
 		byte[] data = new byte[len / 2];
 		for (int i = 0; i < len; i += 2) {
-			data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4) + Character
-					.digit(s.charAt(i + 1), 16));
+			int msb = Character.digit(s.charAt(i), 16);
+			if (msb < 0)
+				throw new NumberFormatException(
+						"There is an invalid character in the number at position "
+								+ i + ": " + s);
+
+			int lsb = Character.digit(s.charAt(i + 1), 16);
+			if (lsb < 0)
+				throw new NumberFormatException(
+						"There is an invalid character in the number at position "
+								+ (i + 1) + ": " + s);
+
+			data[i / 2] = (byte) ((msb << 4) + lsb);
 		}
 		return data;
 	}
