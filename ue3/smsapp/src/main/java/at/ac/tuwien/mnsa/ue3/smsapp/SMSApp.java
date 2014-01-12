@@ -30,7 +30,7 @@ public class SMSApp {
 	private static final int CONNECTION_TIMEOUT = 1000;
 	public static final int DELAY_DEFAULT = 0;
 	public static final int DELAY_SMS = 10000;
-	public static final int DELAY_CALL = 8000;
+	public static final int DELAY_CALL = 10000;
 
 	public static void main(String[] args) {
 		// TODO Step-by-step functionality
