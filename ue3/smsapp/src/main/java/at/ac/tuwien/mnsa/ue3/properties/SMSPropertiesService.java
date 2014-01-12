@@ -22,6 +22,8 @@ public class SMSPropertiesService implements PropertiesService {
 
 	public static final String SMSC_KEY = "smsc";
 
+	public static final String RECIPIENT_KEY = "recipient";
+
 	private Properties prop;
 
 	// Private constructor prevents instantiation from other classes
@@ -48,6 +50,7 @@ public class SMSPropertiesService implements PropertiesService {
 		checkKey(prop, CSV_KEY);
 		// checkKey(prop, PIN_KEY);
 		// checkKey(prop, SMSC_KEY);
+		// checkKey(prop, RECIPIENT_KEY);
 
 		return prop;
 	}

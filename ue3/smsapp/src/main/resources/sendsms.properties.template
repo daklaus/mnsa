@@ -1,2 +1,15 @@
 csvfile=sendsms.csv
 port=COM1
+pin=1234
+recipient=+436647654321
+smsc=+436641234567
+
+# Other Austrian SMSC telephone numbers (international convention):
+# > Drei        -->   +4366000660
+# > A1          -->   +436640501
+# > aonMobil    -->   +436640501
+# > Bob         -->   +436640501
+# > Orange      -->   +436990001999 
+# > T-Mobile    -->   +43676021
+# > tele.ring   -->   +4365009000000
+# > Yesss       -->   +436990008999
