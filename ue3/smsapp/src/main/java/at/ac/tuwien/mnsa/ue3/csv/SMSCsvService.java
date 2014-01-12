@@ -74,15 +74,16 @@ public class SMSCsvService implements CsvService {
 				// Check for correctness of recipient and message
 				try {
 					rawSms = checkRawSms(rawSms);
+
+					// Create a SMS and save it into the smsList
+					LOG.info(
+							"SMS going to be saved. Recipient: \"{}\", Message: \"{}\"",
+							rawSms[0], rawSms[1]);
+					smsList.add(new SMS(rawSms[0], rawSms[1]));
+
 				} catch (IllegalArgumentException e) {
 					LOG.error(e.getMessage());
 				}
-
-				// Create a SMS and save it into the smsList
-				LOG.info(
-						"SMS going to be saved. Recipient: \"{}\", Message: \"{}\"",
-						rawSms[0], rawSms[1]);
-				smsList.add(new SMS(rawSms[0], rawSms[1]));
 			}
 
 		} catch (FileNotFoundException e) {

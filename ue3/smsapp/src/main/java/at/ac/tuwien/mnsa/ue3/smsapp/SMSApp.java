@@ -37,23 +37,23 @@ public class SMSApp {
 
 	public static void main(String[] args) {
 
-		List<SMS> smsList = null;
-		try {
-			prop = PropertiesServiceFactory.getPropertiesService()
-					.getProperties();
-
-			smsList = CsvServiceFactory.getCsvService().getSMSList();
-
-			LOG.info("The following SMS will be sent:");
-			for (SMS sms : smsList) {
-				LOG.info("Recipient: \"{}\", Message: \"{}\"",
-						sms.getRecipient(), sms.getMessage());
-			}
-
-		} catch (IOException e) {
-			LOG.info(e.getMessage());
-			LOG.info("Halting application...");
-		}
+		// List<SMS> smsList = null;
+		// try {
+		// prop = PropertiesServiceFactory.getPropertiesService()
+		// .getProperties();
+		//
+		// smsList = CsvServiceFactory.getCsvService().getSMSList();
+		//
+		// LOG.info("The following SMS will be sent:");
+		// for (SMS sms : smsList) {
+		// LOG.info("Recipient: \"{}\", Message: \"{}\"",
+		// sms.getRecipient(), sms.getMessage());
+		// }
+		//
+		// } catch (IOException e) {
+		// LOG.info(e.getMessage());
+		// LOG.info("Halting application...");
+		// }
 
 	}
 
