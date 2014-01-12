@@ -22,7 +22,7 @@ public class SMSAppTest {
 
 	private static Properties prop;
 
-	private static SMSApp sms;
+	private static SMSApp smsApp;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws IOException {
@@ -31,7 +31,7 @@ public class SMSAppTest {
 		LOG.info("Setting up UnitTests...");
 		LOG.info("=======================");
 
-		sms = SMSApp.getInstance();
+		smsApp = SMSApp.getInstance();
 
 		prop = PropertiesServiceFactory.getPropertiesService().getProperties();
 	}
@@ -43,7 +43,7 @@ public class SMSAppTest {
 		LOG.info("Starting teardown...");
 		LOG.info("====================");
 
-		sms.close();
+		smsApp.close();
 
 		LOG.info("Teardown done. Shutting down now...");
 	}
@@ -76,19 +76,19 @@ public class SMSAppTest {
 						.length() > 0)) {
 
 			LOG.info("Enabling TextMode...");
-			answer = sms.sendATCommand("AT+CMGF=1", SMSApp.DELAY_DEFAULT);
+			answer = smsApp.sendATCommand("AT+CMGF=1", SMSApp.DELAY_DEFAULT);
 
 			LOG.info("Return-Code: {}", answer[1]);
 			LOG.info("Telephone sent: {}", answer[0]);
 
 			LOG.info("Sending SMS to {}",
 					prop.getProperty(SMSPropertiesService.RECIPIENT_KEY));
-			sms.sendATCommand(
+			smsApp.sendATCommand(
 					"AT+CMGS=\""
 							+ prop.getProperty(SMSPropertiesService.RECIPIENT_KEY)
 							+ "\"\r\n", SMSApp.DELAY_DEFAULT);
 
-			answer = sms.sendATCommand("these go to 11" + '\032',
+			answer = smsApp.sendATCommand("these go to 11" + '\032',
 					SMSApp.DELAY_SMS);
 
 			LOG.info("Return-Code: {}", answer[1]);
@@ -109,7 +109,7 @@ public class SMSAppTest {
 		LOG.info("Modem Information");
 		LOG.info("=================");
 
-		answer = sms.sendATCommand("ATI7", SMSApp.DELAY_DEFAULT);
+		answer = smsApp.sendATCommand("ATI7", SMSApp.DELAY_DEFAULT);
 
 		LOG.info("Return-Code: {}", answer[1]);
 		LOG.info("Telephone sent: {}", answer[0]);
@@ -134,7 +134,7 @@ public class SMSAppTest {
 					+ prop.getProperty(SMSPropertiesService.RECIPIENT_KEY)
 					+ ";\"");
 
-			answer = sms
+			answer = smsApp
 					.sendATCommand(
 							"ATD+"
 									+ prop.getProperty(SMSPropertiesService.RECIPIENT_KEY)

@@ -7,11 +7,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.tuwien.mnsa.ue3.csv.CsvServiceFactory;
+import at.ac.tuwien.mnsa.ue3.csv.SMS;
 import at.ac.tuwien.mnsa.ue3.properties.PropertiesServiceFactory;
 import at.ac.tuwien.mnsa.ue3.properties.SMSPropertiesService;
 
@@ -25,7 +28,7 @@ public class SMSApp {
 
 	private PrintWriter writer;
 
-	private Properties prop;
+	private static Properties prop;
 
 	private static final int CONNECTION_TIMEOUT = 1000;
 	public static final int DELAY_DEFAULT = 0;
@@ -33,7 +36,24 @@ public class SMSApp {
 	public static final int DELAY_CALL = 10000;
 
 	public static void main(String[] args) {
-		// TODO Step-by-step functionality
+
+		List<SMS> smsList = null;
+		try {
+			prop = PropertiesServiceFactory.getPropertiesService()
+					.getProperties();
+
+			smsList = CsvServiceFactory.getCsvService().getSMSList();
+
+			LOG.info("The following SMS will be sent:");
+			for (SMS sms : smsList) {
+				LOG.info("Recipient: \"{}\", Message: \"{}\"",
+						sms.getRecipient(), sms.getMessage());
+			}
+
+		} catch (IOException e) {
+			LOG.info(e.getMessage());
+			LOG.info("Halting application...");
+		}
 
 	}
 
