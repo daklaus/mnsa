@@ -22,7 +22,7 @@ public class SMSPropertiesService implements PropertiesService {
 
 	public static final String SMSC_KEY = "smsc";
 
-	public static final String RECIPIENT_KEY = "recipient";
+//	public static final String RECIPIENT_KEY = "recipient"; TODO delete
 
 	private Properties prop;
 
@@ -41,9 +41,10 @@ public class SMSPropertiesService implements PropertiesService {
 
 	@Override
 	public Properties getProperties() throws IOException {
-		if (prop == null) {
-			prop = loadProperties(PROPERTIES_FILE);
-		}
+		if(prop != null)
+			return prop;
+		
+		prop = loadProperties(PROPERTIES_FILE);
 
 		// Check required properties
 		checkKey(prop, PORT_KEY);
