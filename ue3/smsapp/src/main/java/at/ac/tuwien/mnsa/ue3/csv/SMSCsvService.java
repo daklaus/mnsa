@@ -1,6 +1,5 @@
 package at.ac.tuwien.mnsa.ue3.csv;
 
-import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.tuwien.mnsa.ue3.properties.PropertiesServiceFactory;
 import at.ac.tuwien.mnsa.ue3.properties.SMSPropertiesService;
+import au.com.bytecode.opencsv.CSVReader;
 
 public class SMSCsvService implements CsvService {
 
@@ -54,36 +54,33 @@ public class SMSCsvService implements CsvService {
 		String csvFile = PropertiesServiceFactory.getPropertiesService()
 				.getProperties().getProperty(SMSPropertiesService.CSV_KEY);
 
-		BufferedReader br = null;
-		String line = "";
-		String cvsSplitBy = ",";
+		String[] line;
+		char cvsSplitBy = ',';
 		String[] rawSms = { "", "" };
+		CSVReader reader = null;
 
 		try {
-			br = new BufferedReader(new InputStreamReader(
-					ClassLoader.getSystemResourceAsStream(csvFile)));
+			reader = new CSVReader(new InputStreamReader(
+					ClassLoader.getSystemResourceAsStream(csvFile)), cvsSplitBy);
 
 			smsList = new ArrayList<SMS>();
 
 			// Read contents per line...
-			while ((line = br.readLine()) != null) {
-
-				// first comma separates recipient from message
-				rawSms = line.trim().split(cvsSplitBy, 2);
+			while ((line = reader.readNext()) != null) {
 
 				// Check for correctness of recipient and message
 				try {
-					rawSms = checkRawSms(rawSms);
+					rawSms = checkRawSms(line[0], line[1]);
 
 					// Create a SMS and save it into the smsList
-					LOG.info(
-							"SMS going to be saved. Recipient: \"{}\", Message: \"{}\"",
-							rawSms[0], rawSms[1]);
+					LOG.info("SMS going to be saved.");
 					smsList.add(new SMS(rawSms[0], rawSms[1]));
 
 				} catch (IllegalArgumentException e) {
 					LOG.error(e.getMessage());
 				}
+
+				LOG.info(" ");
 			}
 
 		} catch (FileNotFoundException e) {
@@ -91,9 +88,9 @@ public class SMSCsvService implements CsvService {
 		} catch (IOException e) {
 			throw new IOException("Couldn't load " + csvFile + "!", e);
 		} finally {
-			if (br != null) {
+			if (reader != null) {
 				try {
-					br.close();
+					reader.close();
 				} catch (IOException e) {
 				}
 			}
@@ -102,31 +99,38 @@ public class SMSCsvService implements CsvService {
 		return smsList;
 	}
 
-	private String[] checkRawSms(String[] rawSms)
-			throws IllegalArgumentException {
-		String recipient = "";
-		String message = "";
+	private String[] checkRawSms(String recipient, String message)
+			throws IllegalArgumentException, IndexOutOfBoundsException {
 
 		// Trim whitespace of recipient and message...
-		recipient = rawSms[0].trim();
-		message = rawSms[1].trim();
+		recipient = recipient.trim();
+		message = message.trim();
+
+		LOG.info("Got recipient \"{}\" with message \"{}\"", recipient, message);
 
 		// Check if recipient or message have 0 length...
-		if ((recipient == "") || (message == ""))
+		if ((recipient.equalsIgnoreCase("")) || (message.equalsIgnoreCase("")))
 			throw new IllegalArgumentException(
 					"No recipent or message specified");
 
-		// Filter \r\n from the end of message...
-		if (message.lastIndexOf("\r\n") != -1) {
-			message = message.substring(message.lastIndexOf("\r\n"));
-			LOG.info("Message without CRs: {}", message);
+		// Filter rn from the end of message...
+		if (message.length() > 1) {
+			if (message.substring(message.length() - 2, message.length())
+					.contains("rn")) {
+				message = message.substring(0, message.length() - 2);
+				LOG.info("Message without CRs: {}", message);
+			}
 		}
 
 		// Check telephone number of recipient...
-		if ((!recipient.substring(0, 1).equalsIgnoreCase("+"))
-				|| (!recipient.substring(1).matches("\\d+(\\.\\d+)?")))
+		if (recipient.length() > 1) {
+			if ((!recipient.substring(0, 1).equalsIgnoreCase("+"))
+					|| (!recipient.substring(1).matches("\\d+(\\.\\d+)?")))
+				throw new IllegalArgumentException(
+						"Format of international telephone number not correct!");
+		} else
 			throw new IllegalArgumentException(
-					"Format of international telephone number not correct!");
+					"Format of international telephone number not correct! Telephone number is too short.");
 
 		return new String[] { recipient, message };
 	}
