@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.List;
-import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,130 +19,88 @@ import at.ac.tuwien.mnsa.ue3.properties.SMSPropertiesService;
 
 public class SMSApp {
 
-	private static final Logger LOG = LoggerFactory.getLogger(SMSApp.class);
+	private static final Logger log = LoggerFactory.getLogger(SMSApp.class);
 
-	private SerialPort serialPort;
-
-	private BufferedReader reader;
-
-	private PrintWriter writer;
-
-	private static Properties prop;
+	private static SerialPort serialPort;
+	private static BufferedReader reader;
+	private static PrintWriter writer;
 
 	private static final int CONNECTION_TIMEOUT = 1000;
-	public static final int DELAY_DEFAULT = 0;
-	public static final int DELAY_SMS = 10000;
-	public static final int DELAY_CALL = 10000;
+	private static final int PIN_MAX_RETRY = 3;
+	private static final int SMSC_MAX_RETRY = 3;
 
-	public static void main(String[] args) {
-
-		// List<SMS> smsList = null;
-		// try {
-		// prop = PropertiesServiceFactory.getPropertiesService()
-		// .getProperties();
-		//
-		// smsList = CsvServiceFactory.getCsvService().getSMSList();
-		//
-		// LOG.info("The following SMS will be sent:");
-		// for (SMS sms : smsList) {
-		// LOG.info("Recipient: \"{}\", Message: \"{}\"",
-		// sms.getRecipient(), sms.getMessage());
-		// }
-		//
-		// } catch (IOException e) {
-		// LOG.info(e.getMessage());
-		// LOG.info("Halting application...");
-		// }
-
-	}
-
-	private SMSApp() {
+	public static void main(String[] args) throws Exception {
 		try {
-			LOG.info("================================");
-			LOG.info("Setting up locale environment...");
-			LOG.info("================================");
+			try {
+				log.debug("Setting up locale environment...");
 
-			LOG.info("Getting properties...");
+				log.debug("Getting properties...");
+				String comPort = getComPort();
 
-			prop = PropertiesServiceFactory.getPropertiesService()
-					.getProperties();
+				log.debug("Loading SMS list...");
+				List<SMS> smsList = CsvServiceFactory.getCsvService()
+						.getSMSList();
 
-			String comPort = prop.getProperty(SMSPropertiesService.PORT_KEY);
-			String csvFile = prop.getProperty(SMSPropertiesService.CSV_KEY);
+				log.debug("The following SMS will be sent:");
+				for (SMS sms : smsList) {
+					log.debug("Recipient: \"{}\", Message: \"{}\"",
+							sms.getRecipient(), sms.getMessage());
+				}
 
-			LOG.info("COM-Port: {}", comPort);
-			LOG.info("CSV-File: {}", csvFile);
+				log.debug("Opening Serial Port...");
+				serialPort = (SerialPort) CommPortIdentifier.getPortIdentifier(
+						comPort).open("Test Terminal", CONNECTION_TIMEOUT);
+				serialPort.enableReceiveTimeout(CONNECTION_TIMEOUT);
 
-			LOG.info("Opening Serial Port...");
-			serialPort = (SerialPort) CommPortIdentifier.getPortIdentifier(
-					comPort).open("Test Terminal", CONNECTION_TIMEOUT);
-			serialPort.enableReceiveTimeout(CONNECTION_TIMEOUT);
+				log.debug("Setting up I/O communication...");
+				reader = new BufferedReader(new InputStreamReader(
+						serialPort.getInputStream()));
+				writer = new PrintWriter(serialPort.getOutputStream(), true);
 
-			LOG.info("Setting up I/O communication...");
-			reader = new BufferedReader(new InputStreamReader(
-					serialPort.getInputStream()));
-			writer = new PrintWriter(serialPort.getOutputStream(), true);
+				log.debug("Environment setup done.");
 
-			LOG.info("Environment setup done.");
+				log.debug("Bringing telephone up to speed...");
+				initializeTelephone();
 
-			LOG.info(" ");
-			LOG.info("=================================");
-			LOG.info("Bringing telephone up to speed...");
-			LOG.info("=================================");
-			initializeTelephone();
-
+			} finally {
+				close();
+			}
 		} catch (Exception e) {
-			LOG.error(e.getMessage());
-
-			close();
-
-			LOG.error("Halting application...");
-
-			System.exit(1);
+			log.error(e.getMessage());
+			throw e;
 		}
 	}
 
-	private static class SMSAppHolder {
-		public static final SMSApp INSTANCE = new SMSApp();
-	}
-
-	public static SMSApp getInstance() {
-		return SMSAppHolder.INSTANCE;
-	}
-
-	private void initializeTelephone() throws Exception {
-		LOG.info("Resetting telephone...");
-		// Doing 3 times, just to be sure... ;) 1 times doesn't work 100%
-		resetTelephone();
-		resetTelephone();
+	private static void initializeTelephone() throws Exception {
+		log.debug("Resetting telephone...");
 		resetTelephone();
 
-		LOG.info("Turning off echo of telephone...");
+		log.debug("Turning off echo of telephone...");
 		turnEchoOff();
 
-		LOG.info("Checking for PIN-Code...");
-		checkPIN();
+		log.debug("Checking for PIN-Code...");
+		checkPinLock();
 
-		LOG.info("Checking SMSC...");
-		checkSMSC();
+		log.debug("Checking SMSC...");
+		checkSmsc();
 
-		LOG.info("Initial telephone setup done. Lookup the LOG, if there are any errors!");
+		log.debug("Initial telephone setup done.");
 	}
 
 	/**
 	 * Frees up resources
 	 */
-	public void close() {
+	private static void close() {
 		if (writer != null)
 			writer.close();
-		if (writer != null)
+		if (reader != null)
 			try {
 				reader.close();
-			} catch (IOException e1) {
+			} catch (IOException e) {
+				log.error(e.getMessage());
 			}
 		if (serialPort != null)
 			serialPort.close();
-		prop.clear();
 	}
 
 	/**
@@ -153,59 +110,47 @@ public class SMSApp {
 	 * 
 	 * @throws Exception
 	 */
-	public void checkSMSC() throws Exception {
-		String answer[];
-		String smsc = "";
+	private static void checkSmsc() throws Exception {
+		String answer = sendATCommand("AT+CSCA?").getAnswer();
 
-		answer = sendATCommand("AT+CSCA?", DELAY_DEFAULT);
+		if (!answer.contains("+CSCA: \"\",")) {
+			log.debug("CSCA already set...");
+			return;
+		}
 
-		LOG.info("Return-Code: {}", answer[1]);
-		LOG.info("Telephone sent: {}", answer[0]);
+		// SMSC needs to be set
+		log.debug("SMSC not set; Looking up properties file for SMSC telephone number...");
 
-		if (answer[0].contains("+CSCA: \"\",")) {
+		// Is a there valid SMSC_KEY available in the properties file?
+		String smsc = getSmsc();
 
-			// SMSC needs to be set
-			LOG.info("SMSC not set; Looking up properties file for SMSC telephone number...");
-
-			// Is a there valid SMSC_KEY available in the properties file?
-			if ((prop.getProperty(SMSPropertiesService.SMSC_KEY) != null)
-					&& (prop.getProperty(SMSPropertiesService.SMSC_KEY)
-							.length() > 0)) {
-
-				// Try to set the SMSC...
-				LOG.info("Using the specified SMSC telephone number...");
-				if (setSMSC(prop.getProperty(SMSPropertiesService.SMSC_KEY)))
-					LOG.info("Succesfully set SMSC telephone number!");
-				else {
-					LOG.error("Couldn't set the SMSC telephone number! Did you mention the wrong SMSC telephone number?");
-					throw new Exception();
-				}
-
-			} else {
-				LOG.info("No SMSC telephone number specified!");
-
+		int tryCount = 0;
+		boolean successfullySet = false;
+		do {
+			if (smsc == null || smsc.length() <= 0 || tryCount > 1) {
 				// Specify SMSC by the keyboard...
-				// Update: Can't get console while unit testing... So skipping
-				// this part...
+				log.debug("There is no SMSC telephone number specified in the properties file... Starting keyboard input of the SMSC number...");
 
-				LOG.info("There is no SMSC telephone number specified in the properties file... Starting keyboard input of the SMSC number...");
-				System.out
-						.println("Please enter a valid international SMSC telephone number:");
-				smsc = new String(System.console().readPassword());
-
-				LOG.info("Sending the specified SMSC to telephone...");
-				if (setSMSC(smsc))
-					LOG.info("Succesfully set SMSC telephone number!");
-				else {
-					LOG.error("Couldn't set the SMSC telephone number! Did you mention the wrong SMSC telephone number?");
-					throw new Exception();
-				}
+				System.out.print("Enter SMSC in international format: ");
+				smsc = new String(System.console().readLine());
 			}
 
-		} else
-			LOG.info("CSCA already set...");
+			successfullySet = trySetSmsc(smsc);
+			if (!successfullySet) {
+				System.out
+						.println("The phone didn't accept the specifyed SMSC (try "
+								+ (tryCount + 1) + "/" + SMSC_MAX_RETRY + ")!");
+			}
 
-		smsc = "";
+			tryCount++;
+		} while (!successfullySet && tryCount < SMSC_MAX_RETRY);
+
+		if (successfullySet)
+			log.debug("Succesfully set SMSC telephone number!");
+		else {
+			throw new RuntimeException(
+					"Couldn't set the SMSC telephone number! Did you mention the wrong SMSC telephone number?");
+		}
 	}
 
 	/**
@@ -217,22 +162,14 @@ public class SMSApp {
 	 *            +436990008999 --> YESSS)
 	 * @return True if SMSC was successfully set; False otherwise
 	 */
-	private boolean setSMSC(String smsc) {
-		String[] answer;
-
+	private static boolean trySetSmsc(String smsc) {
 		// Send AT+CSCA="smsc",145 to the telephone...
-		answer = sendATCommand("AT+CSCA=\"" + smsc + "\",145", DELAY_DEFAULT);
-
-		LOG.info("Return-Code: {}", answer[1]);
-		LOG.info("Telephone sent: {}", answer[0]);
+		sendATCommand("AT+CSCA=\"" + smsc + "\",145");
 
 		// Check SMSC setting...
-		answer = sendATCommand("AT+CSCA?", DELAY_DEFAULT);
+		String answer = sendATCommand("AT+CSCA?").getAnswer();
 
-		LOG.info("Return-Code: {}", answer[1]);
-		LOG.info("Telephone sent: {}", answer[0]);
-
-		if (answer[0].contains("+CSCA: \"" + smsc + "\",145")) {
+		if (answer.contains("+CSCA: \"" + smsc + "\",145")) {
 			return true;
 		}
 
@@ -246,57 +183,46 @@ public class SMSApp {
 	 * 
 	 * @throws Exception
 	 */
-	public void checkPIN() throws Exception {
-		String answer[];
-		String pin = "";
+	private static void checkPinLock() throws Exception {
+		String answer = sendATCommand("AT+CPIN?").getAnswer();
 
-		answer = sendATCommand("AT+CPIN?", DELAY_DEFAULT);
+		if (answer.contains("READY")) {
+			log.debug("Telephone already unlocked...");
+			return;
+		}
 
-		LOG.info("Return-Code: {}", answer[1]);
-		LOG.info("Telephone sent: {}", answer[0]);
+		log.debug("Telephone is protected by a PIN-Code and needs to be unlocked!");
+		log.debug("Reading PIN from properties file...");
 
-		if (!answer[0].contains("READY")) {
-			LOG.info("Telephone is protected by a PIN-Code and needs to be unlocked!");
-			LOG.info("Reading PIN from properties file...");
+		// Is there a valid PIN_KEY available in the properties file?
+		String pin = getPin();
 
-			// Is there a valid PIN_KEY available in the properties file?
-			if ((prop.getProperty(SMSPropertiesService.PIN_KEY) != null)
-					&& (prop.getProperty(SMSPropertiesService.PIN_KEY).length() > 0)) {
-
-				// Try to unlock the SIM-Card...
-				LOG.info("Using the PIN-Code of the properties file...");
-				if (loginUsingPIN(prop
-						.getProperty(SMSPropertiesService.PIN_KEY)))
-					LOG.info("Succesfully logged in using the specified PIN!");
-				else {
-					LOG.error("Couldn't unlock the SIM-Card! Did you mention the wrong PIN-Code?");
-					throw new Exception();
-				}
-
-			} else {
-				LOG.info("No PIN-Code specified!");
-
+		int tryCount = 0;
+		boolean unlocked = false;
+		do {
+			if (pin == null || pin.length() <= 0 || tryCount > 1) {
 				// Specify PIN Code by the keyboard...
-				// Update: Can't get console while unit testing... So skipping
-				// this part...
+				log.debug("There is no PIN-Code specified in the properties file... Starting keyboard input of the PIN-Code...");
 
-				LOG.info("There is no PIN-Code specified in the properties file... Starting keyboard input of the PIN-Code...");
-				System.out.println("Please enter a valid PIN-Code:");
+				System.out.print("Enter PIN-Code: ");
 				pin = new String(System.console().readPassword());
-
-				LOG.info("Sending PIN to telephone...");
-				if (loginUsingPIN(pin))
-					LOG.info("Succesfully logged in using the specified PIN!");
-				else {
-					LOG.error("Couldn't unlock the telephone! Did you mention the wrong PIN-Code?");
-					throw new Exception();
-				}
 			}
 
-		} else
-			LOG.info("Telephone already unlocked...");
+			unlocked = tryPinUnlock(pin);
+			if (!unlocked) {
+				System.out.println("The specifyed PIN was wrong (try "
+						+ (tryCount + 1) + "/" + PIN_MAX_RETRY + ")!");
+			}
 
-		pin = "";
+			tryCount++;
+		} while (!unlocked && tryCount < PIN_MAX_RETRY);
+
+		if (unlocked)
+			log.debug("Succesfully logged in using the specified PIN!");
+		else {
+			throw new RuntimeException(
+					"Couldn't unlock the SIM-Card! Did you mention the wrong PIN-Code?");
+		}
 	}
 
 	/**
@@ -307,22 +233,14 @@ public class SMSApp {
 	 *            The PIN-Code
 	 * @return True if Login was successful; False otherwise
 	 */
-	public boolean loginUsingPIN(String pin) {
-		String[] answer;
-
+	private static boolean tryPinUnlock(String pin) {
 		// Send AT+CPIN=pin to the telephone...
-		answer = sendATCommand("AT+CPIN=" + pin, DELAY_DEFAULT);
-
-		LOG.info("Return-Code: {}", answer[1]);
-		LOG.info("Telephone sent: {}", answer[0]);
+		sendATCommand("AT+CPIN=" + pin);
 
 		// Check lockstate...
-		answer = sendATCommand("AT+CPIN?", DELAY_DEFAULT);
+		String answer = sendATCommand("AT+CPIN?").getAnswer();
 
-		LOG.info("Return-Code: {}", answer[1]);
-		LOG.info("Telephone sent: {}", answer[0]);
-
-		if (answer[0].contains("READY")) {
+		if (answer.contains("READY")) {
 			return true;
 		}
 
@@ -332,25 +250,18 @@ public class SMSApp {
 	/**
 	 * Resets the telephone to its default values
 	 */
-	public void resetTelephone() {
-		String answer[];
-
-		answer = sendATCommand("ATZ", DELAY_DEFAULT);
-
-		LOG.info("Return-Code: {}", answer[1]);
-		LOG.info("Telephone sent: {}", answer[0]);
+	private static void resetTelephone() {
+		// Doing 3 times, just to be sure... ;) 1 times doesn't work 100%
+		sendATCommand("\u001aATZ");
+		sendATCommand("ATZ");
+		sendATCommand("ATZ");
 	}
 
 	/**
 	 * Turns off the telephones echo function
 	 */
-	public void turnEchoOff() {
-		String answer[];
-
-		answer = sendATCommand("ATE0", DELAY_DEFAULT);
-
-		LOG.info("Return-Code: {}", answer[1]);
-		LOG.info("Telephone sent: {}", answer[0]);
+	private static void turnEchoOff() {
+		sendATCommand("ATE0");
 	}
 
 	/**
@@ -359,26 +270,20 @@ public class SMSApp {
 	 * 
 	 * @param command
 	 *            The AT command, starting with "AT" (do not specify CR!)
-	 * @param delay
-	 *            The period in milliseconds the the application waits before
-	 *            processing the telephones return values
 	 * @return String[] containing the answer ([0]) and the Return-Code ([1])
 	 *         from the telephone
 	 */
-	public String[] sendATCommand(String command, int delay) {
+	private static ATCommandReturn sendATCommand(String command) {
 		String answer = "";
 		String returnCode = "";
 		boolean first = true;
 
-		LOG.info("Sending \"{}\"", command);
+		log.debug("Sending \"{}\"", command);
 		writer.write(command + "\r\n");
 		writer.flush();
 
-		try {
-			Thread.sleep(delay);
-		} catch (InterruptedException e) {
-		}
-
+		// TODO This is suboptimal, maybe there is a cleaner implementation for
+		// this
 		while (true) {
 			try {
 				if (first) {
@@ -394,6 +299,52 @@ public class SMSApp {
 			}
 		}
 
-		return new String[] { answer, returnCode };
+		log.debug("Return-Code: {}", returnCode);
+		log.debug("Telephone sent: {}", answer);
+
+		return new ATCommandReturn(answer, returnCode);
+	}
+
+	private static String getComPort() throws IOException {
+		return PropertiesServiceFactory.getPropertiesService().getProperties()
+				.getProperty(SMSPropertiesService.PORT_KEY);
+	}
+
+	private static String getCsvFileName() throws IOException {
+		return PropertiesServiceFactory.getPropertiesService().getProperties()
+				.getProperty(SMSPropertiesService.CSV_KEY);
+	}
+
+	private static String getSmsc() throws IOException {
+		return PropertiesServiceFactory.getPropertiesService().getProperties()
+				.getProperty(SMSPropertiesService.SMSC_KEY);
+	}
+
+	private static String getPin() throws IOException {
+		return PropertiesServiceFactory.getPropertiesService().getProperties()
+				.getProperty(SMSPropertiesService.PIN_KEY);
+	}
+
+	private static class ATCommandReturn {
+		private final String returnCode;
+		private final String answer;
+
+		public ATCommandReturn(String answer, String returnCode) {
+			if (answer == null || returnCode == null)
+				throw new IllegalArgumentException(
+						"answer or returnCode is null");
+
+			this.returnCode = returnCode;
+			this.answer = answer;
+		}
+
+		public String getReturnCode() {
+			return returnCode;
+		}
+
+		public String getAnswer() {
+			return answer;
+		}
+
 	}
 }
