@@ -11,7 +11,7 @@ public class SMS {
 		if (message.trim().isEmpty())
 			throw new IllegalArgumentException("The message is empty");
 		recipient = recipient.trim();
-		if (recipient.matches("^\\+\\d{3,}"))
+		if (!recipient.matches("^\\+\\d{3,}"))
 			throw new IllegalArgumentException(
 					"The recipient is not in international format (e.g. +436641234567)");
 

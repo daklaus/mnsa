@@ -62,7 +62,9 @@ public class SMSApp {
 				log.debug("Bringing telephone up to speed...");
 				initializeTelephone();
 
-				// TODO Send the sms ;)
+				for (SMS sms : smsList) {
+					// TODO Send the sms ;)
+				}
 
 			} finally {
 				close();

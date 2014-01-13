@@ -30,6 +30,8 @@ public class SMSCsvServiceTest {
 	public static void tearDownAfterClass() throws Exception {
 	}
 
+	// TODO Since there are no assertions this unit test doesn't test anything!
+	// TODO The test is not independent from the resources (csv file)!
 	@Test
 	public void showSendableSMS() {
 
