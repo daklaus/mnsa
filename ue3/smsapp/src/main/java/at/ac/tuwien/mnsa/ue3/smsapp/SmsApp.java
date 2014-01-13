@@ -31,6 +31,7 @@ public class SmsApp {
 	private static final int CONNECTION_TIMEOUT = 1000;
 	private static final int PIN_MAX_RETRY = 3;
 	private static final int SMSC_MAX_RETRY = 3;
+	private static final int WAIT_FOR_SEND_REPLY = 5000;
 
 	public static void main(String[] args) throws Exception {
 		try {
@@ -60,17 +61,22 @@ public class SmsApp {
 				initializeTelephone();
 
 				ATCommandReturn cmdReturn;
+				String msg;
 				for (Sms sms : smsList) {
-					log.info("Processing SMS to \"" + sms.getRecipient()
-							+ "\": \"" + sms.getMessage() + "\"");
+					msg = "Processing SMS to \"" + sms.getRecipient()
+							+ "\": \"" + sms.getMessage() + "\"";
+					System.out.println(msg);
+					log.info(msg);
 
 					log.debug("Splitting into parts...");
 					List<SmsDataPart> parts = SmsService.getSmsDataParts(sms);
 					if (parts == null || parts.isEmpty())
 						continue;
 
-					log.debug("SMS got " + parts.size() + " parts.");
+					if (parts.size() > 1)
+						log.debug("SMS got " + parts.size() + " parts.");
 
+					int i = 0;
 					for (SmsDataPart smsDataPart : parts) {
 
 						// Initiating the SMS sending by sending the number of
@@ -83,10 +89,21 @@ public class SmsApp {
 						cmdReturn = sendATCommand(
 								NumberConverter
 										.bytesToHex(smsDataPart.getPdu()),
-								"\u001a");
+								"\u001a", WAIT_FOR_SEND_REPLY);
 
-						// Maybe we should check the return code or something,
-						// but we cannot do anything anyway
+						// Check if the SMS part was sent successfully
+						if (cmdReturn.getReturnCode().contains("OK")) {
+							msg = "Part " + i + 1 + " of " + parts.size()
+									+ " successfully sent!";
+						} else {
+							msg = "Something went wrong while sending part "
+									+ i + 1 + " of " + parts.size()
+									+ ". Got answer: " + cmdReturn.getAnswer();
+						}
+						System.out.println(msg);
+						log.debug(msg);
+
+						i++;
 					}
 				}
 
@@ -135,7 +152,7 @@ public class SmsApp {
 	}
 
 	private static void setPduMode() {
-		sendATCommand("AT+CMGF=1");
+		sendATCommand("AT+CMGF=0");
 	}
 
 	/**
@@ -303,7 +320,7 @@ public class SmsApp {
 	/**
 	 * Sends an AT command like {@link #sendATCommand(String, String)}
 	 * specifying a carriage return (CR) followed by a line feed (LF) as
-	 * terminator (i.e. "\r\n").
+	 * terminator (i.e. "\r\n") and a zero waiting time for the answer.
 	 * 
 	 * @param command
 	 *            see {@link #sendATCommand(String, String)}
@@ -311,7 +328,7 @@ public class SmsApp {
 	 * @see #sendATCommand(String, String)
 	 */
 	private static ATCommandReturn sendATCommand(String command) {
-		return sendATCommand(command, "\r\n");
+		return sendATCommand(command, "\r\n", 0);
 	}
 
 	/**
@@ -319,12 +336,19 @@ public class SmsApp {
 	 * including the option to wait specified milliseconds for the answer
 	 * 
 	 * @param command
-	 *            The AT command, starting with "AT" (do not specify CR!)
-	 * @return String[] containing the answer ([0]) and the Return-Code ([1])
-	 *         from the telephone
+	 *            the AT command which will be sent (without the terminating
+	 *            CR/LF/CRLF!)
+	 * @param commandTerminator
+	 *            the string which should terminate the command (most of the
+	 *            time "\r\n")
+	 * @param waitForAnswer
+	 *            the number of milliseconds the function should wait before
+	 *            reading the answer from the phone
+	 * @return an {@link ATCommandReturn} object containing the answer from the
+	 *         phone
 	 */
 	private static ATCommandReturn sendATCommand(String command,
-			String commandTerminator) {
+			String commandTerminator, long waitForAnswer) {
 		String answer = "";
 		String returnCode = "";
 		boolean first = true;
@@ -333,6 +357,11 @@ public class SmsApp {
 		log.debug("Sending \"{}\"", command);
 		writer.write(command + commandTerminator);
 		writer.flush();
+
+		try {
+			Thread.sleep(waitForAnswer);
+		} catch (InterruptedException ignored) {
+		}
 
 		while (readOn) {
 			try {
