@@ -1,4 +1,4 @@
-package at.ac.tuwien.mnsa.ue3.properties;
+package at.ac.tuwien.mnsa.ue3.smsapp.properties;
 
 public abstract class PropertiesServiceFactory {
 

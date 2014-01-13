@@ -13,8 +13,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.tuwien.mnsa.ue3.properties.PropertiesServiceFactory;
-import at.ac.tuwien.mnsa.ue3.properties.SMSPropertiesService;
+import at.ac.tuwien.mnsa.ue3.smsapp.properties.PropertiesServiceFactory;
+import at.ac.tuwien.mnsa.ue3.smsapp.properties.SMSPropertiesService;
 
 public class SMSAppTest {
 
@@ -22,7 +22,7 @@ public class SMSAppTest {
 
 	private static Properties prop;
 
-	private static SMSApp smsApp;
+	private static SmsApp smsApp;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws IOException {
@@ -31,7 +31,7 @@ public class SMSAppTest {
 //		log.debug("Setting up UnitTests...");
 //		log.debug("=======================");
 //
-//		sms = SMSApp.getInstance();
+//		sms = SmsApp.getInstance();
 //
 //		prop = PropertiesServiceFactory.getPropertiesService().getProperties();
 	}
@@ -66,7 +66,7 @@ public class SMSAppTest {
 //
 //		log.debug("\n");
 //		log.debug("====================");
-//		log.debug("Send SMS in TextMode");
+//		log.debug("Send Sms in TextMode");
 //		log.debug("====================");
 //
 //		// Is there a valid RECIPIENT_KEY available in the properties file?
@@ -75,20 +75,20 @@ public class SMSAppTest {
 //						.length() > 0)) {
 //
 //			log.debug("Enabling TextMode...");
-//			answer = sms.sendATCommand("AT+CMGF=1", SMSApp.DELAY_DEFAULT);
+//			answer = sms.sendATCommand("AT+CMGF=1", SmsApp.DELAY_DEFAULT);
 //
 //			log.debug("Return-Code: {}", answer[1]);
 //			log.debug("Telephone sent: {}", answer[0]);
 //
-//			log.debug("Sending SMS to {}",
+//			log.debug("Sending Sms to {}",
 //					prop.getProperty(SMSPropertiesService.RECIPIENT_KEY));
 //			sms.sendATCommand(
 //					"AT+CMGS=\""
 //							+ prop.getProperty(SMSPropertiesService.RECIPIENT_KEY)
-//							+ "\"\r\n", SMSApp.DELAY_DEFAULT);
+//							+ "\"\r\n", SmsApp.DELAY_DEFAULT);
 //
 //			answer = sms.sendATCommand("these go to 11" + '\032',
-//					SMSApp.DELAY_SMS);
+//					SmsApp.DELAY_SMS);
 //
 //			log.debug("Return-Code: {}", answer[1]);
 //			log.debug("Telephone sent: {}", answer[0]);
@@ -108,7 +108,7 @@ public class SMSAppTest {
 //		log.debug("Modem Information");
 //		log.debug("=================");
 //
-//		answer = sms.sendATCommand("ATI7", SMSApp.DELAY_DEFAULT);
+//		answer = sms.sendATCommand("ATI7", SmsApp.DELAY_DEFAULT);
 //
 //		log.debug("Return-Code: {}", answer[1]);
 //		log.debug("Telephone sent: {}", answer[0]);
@@ -137,13 +137,13 @@ public class SMSAppTest {
 //					.sendATCommand(
 //							"ATD+"
 //									+ prop.getProperty(SMSPropertiesService.RECIPIENT_KEY)
-//									+ ";", SMSApp.DELAY_CALL);
+//									+ ";", SmsApp.DELAY_CALL);
 //
 //			log.debug("Return-Code: {}", answer[1]);
 //			log.debug("Telephone sent: {}", answer[0]);
 //
 //			// LOG.debug("Hangup telephone...");
-//			// sms.sendATCommand("ATH", SMSApp.DELAY_DEFAULT);
+//			// sms.sendATCommand("ATH", SmsApp.DELAY_DEFAULT);
 //
 //		} else
 //			log.error("No recipient telephone number specified!");

@@ -12,14 +12,16 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.tuwien.mnsa.ue3.csv.CsvServiceFactory;
-import at.ac.tuwien.mnsa.ue3.csv.SMS;
-import at.ac.tuwien.mnsa.ue3.properties.PropertiesServiceFactory;
-import at.ac.tuwien.mnsa.ue3.properties.SMSPropertiesService;
+import at.ac.tuwien.mnsa.ue3.smsapp.csv.CsvServiceFactory;
+import at.ac.tuwien.mnsa.ue3.smsapp.properties.PropertiesServiceFactory;
+import at.ac.tuwien.mnsa.ue3.smsapp.properties.SMSPropertiesService;
+import at.ac.tuwien.mnsa.ue3.smsapp.sms.Sms;
+import at.ac.tuwien.mnsa.ue3.smsapp.sms.SmsDataPart;
+import at.ac.tuwien.mnsa.ue3.smsapp.sms.SmsService;
 
-public class SMSApp {
+public class SmsApp {
 
-	private static final Logger log = LoggerFactory.getLogger(SMSApp.class);
+	private static final Logger log = LoggerFactory.getLogger(SmsApp.class);
 
 	private static SerialPort serialPort;
 	private static BufferedReader reader;
@@ -37,12 +39,12 @@ public class SMSApp {
 				log.debug("Getting properties...");
 				String comPort = getComPort();
 
-				log.debug("Loading SMS list...");
-				List<SMS> smsList = CsvServiceFactory.getCsvService()
+				log.debug("Loading Sms list...");
+				List<Sms> smsList = CsvServiceFactory.getCsvService()
 						.getSMSList();
 
-				// log.debug("The following SMS will be sent:");
-				// for (SMS sms : smsList) {
+				// log.debug("The following Sms will be sent:");
+				// for (Sms sms : smsList) {
 				// log.debug("Recipient: \"{}\", Message: \"{}\"",
 				// sms.getRecipient(), sms.getMessage());
 				// }
@@ -62,8 +64,13 @@ public class SMSApp {
 				log.debug("Bringing telephone up to speed...");
 				initializeTelephone();
 
-				for (SMS sms : smsList) {
-					// TODO Send the sms ;)
+				for (Sms sms : smsList) {
+					log.info("Sending Sms to \"" + sms.getRecipient()
+							+ "\": \"" + sms.getMessage() + "\"");
+
+					List<SmsDataPart> parts = SmsService.getSmsDataParts(sms);
+
+					// TODO Send the sms part ;)
 				}
 
 			} finally {
@@ -88,6 +95,9 @@ public class SMSApp {
 		log.debug("Checking SMSC...");
 		checkSmsc();
 
+		log.debug("Set PDU mode...");
+		setPduMode();
+
 		log.debug("Initial telephone setup done.");
 	}
 
@@ -107,8 +117,12 @@ public class SMSApp {
 			serialPort.close();
 	}
 
+	private static void setPduMode() {
+		sendATCommand("AT+CMGF=1");
+	}
+
 	/**
-	 * Checks if the SMS Service Center Address (SMSC) is set. If not, the
+	 * Checks if the Sms Service Center Address (SMSC) is set. If not, the
 	 * telephone number specified in the properties file is used; if not
 	 * specified, the SMSC telephone number is typed in by the user
 	 * 

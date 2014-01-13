@@ -1,11 +1,11 @@
-package at.ac.tuwien.mnsa.ue3.csv;
+package at.ac.tuwien.mnsa.ue3.smsapp.sms;
 
-public class SMS {
+public class Sms {
 
 	private final String recipient;
 	private final String message;
 
-	public SMS(String recipient, String message) {
+	public Sms(String recipient, String message) {
 		if (recipient == null || message == null)
 			throw new IllegalArgumentException("recipient or message is null");
 		if (message.trim().isEmpty())

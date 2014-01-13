@@ -1,4 +1,4 @@
-package at.ac.tuwien.mnsa.ue3.csv;
+package at.ac.tuwien.mnsa.ue3.smsapp.csv;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -10,8 +10,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.ac.tuwien.mnsa.ue3.properties.PropertiesServiceFactory;
-import at.ac.tuwien.mnsa.ue3.properties.SMSPropertiesService;
+import at.ac.tuwien.mnsa.ue3.smsapp.properties.PropertiesServiceFactory;
+import at.ac.tuwien.mnsa.ue3.smsapp.properties.SMSPropertiesService;
+import at.ac.tuwien.mnsa.ue3.smsapp.sms.Sms;
 import au.com.bytecode.opencsv.CSVReader;
 
 public class SMSCsvService implements CsvService {
@@ -21,7 +22,7 @@ public class SMSCsvService implements CsvService {
 	private static final Logger log = LoggerFactory
 			.getLogger(SMSCsvService.class);
 
-	private List<SMS> smsList;
+	private List<Sms> smsList;
 
 	// Private constructor prevents instantiation from other classes
 	private SMSCsvService() {
@@ -37,7 +38,7 @@ public class SMSCsvService implements CsvService {
 	}
 
 	@Override
-	public List<SMS> getSMSList() throws IOException {
+	public List<Sms> getSMSList() throws IOException {
 		if (smsList == null) {
 			smsList = loadSMS();
 		}
@@ -47,12 +48,12 @@ public class SMSCsvService implements CsvService {
 
 	/**
 	 * Loads content from globally CSV-File (specified in SMSPropertiesService)
-	 * and creates a List of SMS out of it
+	 * and creates a List of Sms out of it
 	 * 
-	 * @return A List containing SMS Elements
+	 * @return A List containing Sms Elements
 	 * @throws IOException
 	 */
-	private List<SMS> loadSMS() throws IOException {
+	private List<Sms> loadSMS() throws IOException {
 
 		String csvFile = PropertiesServiceFactory.getPropertiesService()
 				.getProperties().getProperty(SMSPropertiesService.CSV_KEY);
@@ -66,7 +67,7 @@ public class SMSCsvService implements CsvService {
 						ClassLoader.getSystemResourceAsStream(csvFile)),
 						SEPERATOR);
 
-				smsList = new ArrayList<SMS>();
+				smsList = new ArrayList<Sms>();
 
 				// Read contents per line...
 				for (int i = 0; (line = reader.readNext()) != null; i++) {
@@ -81,14 +82,14 @@ public class SMSCsvService implements CsvService {
 
 					try {
 						// Check for correctness of recipient and message
-						// Is now done in the SMS class constructor (in a much
+						// Is now done in the Sms class constructor (in a much
 						// more efficient and compact way)
 						// TODO delete this
 						// rawSms = checkRawSms(line[0], line[1]);
 
-						// Create a SMS and save it into the smsList
-						log.debug("SMS going to be saved.");
-						smsList.add(new SMS(line[0], line[1]));
+						// Create a Sms and save it into the smsList
+						log.debug("Sms going to be saved.");
+						smsList.add(new Sms(line[0], line[1]));
 
 					} catch (IllegalArgumentException e) {
 						log.error("Error while parsing line {} of {}: {}",

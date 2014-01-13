@@ -10,7 +10,7 @@
 	<name>Serial SMS Sender</name>
 
 	<properties>
-		<mainClass>at.ac.tuwien.mnsa.ue3.smsapp.SMSApp</mainClass>
+		<mainClass>at.ac.tuwien.mnsa.ue3.smsapp.SmsApp</mainClass>
 	</properties>
 
 	<dependencies>
