@@ -283,7 +283,9 @@ public class SMSApp {
 		writer.flush();
 
 		// TODO This is suboptimal, maybe there is a cleaner implementation for
-		// this
+		// this. CHO: I know, also tried scanner (with "hasNext()") and so on,
+		// but couldn't find a "good" (non-workaround) solution... So I used
+		// exceptions.
 		while (true) {
 			try {
 				if (first) {

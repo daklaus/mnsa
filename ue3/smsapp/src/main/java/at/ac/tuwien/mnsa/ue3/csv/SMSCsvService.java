@@ -15,7 +15,7 @@ import au.com.bytecode.opencsv.CSVReader;
 
 public class SMSCsvService implements CsvService {
 
-	private static final Logger LOG = LoggerFactory
+	private static final Logger log = LoggerFactory
 			.getLogger(SMSCsvService.class);
 
 	private List<SMS> smsList;
@@ -68,19 +68,25 @@ public class SMSCsvService implements CsvService {
 			// Read contents per line...
 			while ((line = reader.readNext()) != null) {
 
-				// Check for correctness of recipient and message
-				try {
-					rawSms = checkRawSms(line[0], line[1]);
+				if (line.length == 2) {
+					// Check for correctness of recipient and message
+					try {
+						rawSms = checkRawSms(line[0], line[1]);
 
-					// Create a SMS and save it into the smsList
-					LOG.info("SMS going to be saved.");
-					smsList.add(new SMS(rawSms[0], rawSms[1]));
+						// Create a SMS and save it into the smsList
+						log.info("SMS going to be saved.");
+						smsList.add(new SMS(rawSms[0], rawSms[1]));
 
-				} catch (IllegalArgumentException e) {
-					LOG.error(e.getMessage());
-				}
+					} catch (IllegalArgumentException e) {
+						log.error("Error while parsing: {}", e.getMessage());
+					}
 
-				LOG.info(" ");
+				} else
+					log.error(
+							"Values of the line should count 2 but the actual number is {}",
+							line.length);
+
+				log.info(" ");
 			}
 
 		} catch (FileNotFoundException e) {
@@ -106,7 +112,7 @@ public class SMSCsvService implements CsvService {
 		recipient = recipient.trim();
 		message = message.trim();
 
-		LOG.info("Got recipient \"{}\" with message \"{}\"", recipient, message);
+		log.info("Got recipient \"{}\" with message \"{}\"", recipient, message);
 
 		// Check if recipient or message have 0 length...
 		if ((recipient.equalsIgnoreCase("")) || (message.equalsIgnoreCase("")))
@@ -118,7 +124,7 @@ public class SMSCsvService implements CsvService {
 			if (message.substring(message.length() - 2, message.length())
 					.contains("rn")) {
 				message = message.substring(0, message.length() - 2);
-				LOG.info("Message without CRs: {}", message);
+				log.info("Message without CRs: {}", message);
 			}
 		}
 
