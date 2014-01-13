@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.tuwien.mnsa.ue3.smsapp.properties.PropertiesServiceFactory;
-import at.ac.tuwien.mnsa.ue3.smsapp.properties.SMSPropertiesService;
+import at.ac.tuwien.mnsa.ue3.smsapp.properties.SmsPropertiesService;
 import at.ac.tuwien.mnsa.ue3.smsapp.sms.Sms;
 import au.com.bytecode.opencsv.CSVReader;
 
@@ -47,7 +47,7 @@ public class SMSCsvService implements CsvService {
 	}
 
 	/**
-	 * Loads content from globally CSV-File (specified in SMSPropertiesService)
+	 * Loads content from globally CSV-File (specified in SmsPropertiesService)
 	 * and creates a List of Sms out of it
 	 * 
 	 * @return A List containing Sms Elements
@@ -56,7 +56,7 @@ public class SMSCsvService implements CsvService {
 	private List<Sms> loadSMS() throws IOException {
 
 		String csvFile = PropertiesServiceFactory.getPropertiesService()
-				.getProperties().getProperty(SMSPropertiesService.CSV_KEY);
+				.getProperties().getProperty(SmsPropertiesService.CSV_KEY);
 
 		String[] line;
 		CSVReader reader = null;

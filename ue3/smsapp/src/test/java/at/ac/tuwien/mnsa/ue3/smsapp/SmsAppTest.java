@@ -14,11 +14,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.ac.tuwien.mnsa.ue3.smsapp.properties.PropertiesServiceFactory;
-import at.ac.tuwien.mnsa.ue3.smsapp.properties.SMSPropertiesService;
+import at.ac.tuwien.mnsa.ue3.smsapp.properties.SmsPropertiesService;
 
-public class SMSAppTest {
+public class SmsAppTest {
 
-	private static final Logger log = LoggerFactory.getLogger(SMSAppTest.class);
+	private static final Logger log = LoggerFactory.getLogger(SmsAppTest.class);
 
 	private static Properties prop;
 
@@ -70,8 +70,8 @@ public class SMSAppTest {
 //		log.debug("====================");
 //
 //		// Is there a valid RECIPIENT_KEY available in the properties file?
-//		if ((prop.getProperty(SMSPropertiesService.RECIPIENT_KEY)) != null
-//				&& (prop.getProperty(SMSPropertiesService.RECIPIENT_KEY)
+//		if ((prop.getProperty(SmsPropertiesService.RECIPIENT_KEY)) != null
+//				&& (prop.getProperty(SmsPropertiesService.RECIPIENT_KEY)
 //						.length() > 0)) {
 //
 //			log.debug("Enabling TextMode...");
@@ -81,10 +81,10 @@ public class SMSAppTest {
 //			log.debug("Telephone sent: {}", answer[0]);
 //
 //			log.debug("Sending Sms to {}",
-//					prop.getProperty(SMSPropertiesService.RECIPIENT_KEY));
+//					prop.getProperty(SmsPropertiesService.RECIPIENT_KEY));
 //			sms.sendATCommand(
 //					"AT+CMGS=\""
-//							+ prop.getProperty(SMSPropertiesService.RECIPIENT_KEY)
+//							+ prop.getProperty(SmsPropertiesService.RECIPIENT_KEY)
 //							+ "\"\r\n", SmsApp.DELAY_DEFAULT);
 //
 //			answer = sms.sendATCommand("these go to 11" + '\032',
@@ -126,17 +126,17 @@ public class SMSAppTest {
 //		log.debug("==============");
 //
 //		// Is there a valid RECIPIENT_KEY available in the properties file?
-//		if ((prop.getProperty(SMSPropertiesService.RECIPIENT_KEY)) != null
-//				&& (prop.getProperty(SMSPropertiesService.RECIPIENT_KEY)
+//		if ((prop.getProperty(SmsPropertiesService.RECIPIENT_KEY)) != null
+//				&& (prop.getProperty(SmsPropertiesService.RECIPIENT_KEY)
 //						.length() > 0)) {
 //			log.debug("Sending \"ATD"
-//					+ prop.getProperty(SMSPropertiesService.RECIPIENT_KEY)
+//					+ prop.getProperty(SmsPropertiesService.RECIPIENT_KEY)
 //					+ ";\"");
 //
 //			answer = sms
 //					.sendATCommand(
 //							"ATD+"
-//									+ prop.getProperty(SMSPropertiesService.RECIPIENT_KEY)
+//									+ prop.getProperty(SmsPropertiesService.RECIPIENT_KEY)
 //									+ ";", SmsApp.DELAY_CALL);
 //
 //			log.debug("Return-Code: {}", answer[1]);

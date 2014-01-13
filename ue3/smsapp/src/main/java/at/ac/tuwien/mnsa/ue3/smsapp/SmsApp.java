@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import at.ac.tuwien.mnsa.ue3.smsapp.csv.CsvServiceFactory;
 import at.ac.tuwien.mnsa.ue3.smsapp.properties.PropertiesServiceFactory;
-import at.ac.tuwien.mnsa.ue3.smsapp.properties.SMSPropertiesService;
+import at.ac.tuwien.mnsa.ue3.smsapp.properties.SmsPropertiesService;
 import at.ac.tuwien.mnsa.ue3.smsapp.sms.Sms;
 import at.ac.tuwien.mnsa.ue3.smsapp.sms.SmsDataPart;
 import at.ac.tuwien.mnsa.ue3.smsapp.sms.SmsService;
@@ -65,12 +65,19 @@ public class SmsApp {
 				initializeTelephone();
 
 				for (Sms sms : smsList) {
-					log.info("Sending Sms to \"" + sms.getRecipient()
+					log.info("Processing SMS to \"" + sms.getRecipient()
 							+ "\": \"" + sms.getMessage() + "\"");
 
+					log.debug("Splitting into parts...");
 					List<SmsDataPart> parts = SmsService.getSmsDataParts(sms);
+					if (parts == null || parts.isEmpty())
+						continue;
 
-					// TODO Send the sms part ;)
+					log.debug("SMS got " + parts.size() + " parts.");
+
+					for (SmsDataPart smsDataPart : parts) {
+						// TODO Send the sms part ;)
+					}
 				}
 
 			} finally {
@@ -328,22 +335,22 @@ public class SmsApp {
 
 	private static String getComPort() throws IOException {
 		return PropertiesServiceFactory.getPropertiesService().getProperties()
-				.getProperty(SMSPropertiesService.PORT_KEY);
+				.getProperty(SmsPropertiesService.PORT_KEY);
 	}
 
 	private static String getCsvFileName() throws IOException {
 		return PropertiesServiceFactory.getPropertiesService().getProperties()
-				.getProperty(SMSPropertiesService.CSV_KEY);
+				.getProperty(SmsPropertiesService.CSV_KEY);
 	}
 
 	private static String getSmsc() throws IOException {
 		return PropertiesServiceFactory.getPropertiesService().getProperties()
-				.getProperty(SMSPropertiesService.SMSC_KEY);
+				.getProperty(SmsPropertiesService.SMSC_KEY);
 	}
 
 	private static String getPin() throws IOException {
 		return PropertiesServiceFactory.getPropertiesService().getProperties()
-				.getProperty(SMSPropertiesService.PIN_KEY);
+				.getProperty(SmsPropertiesService.PIN_KEY);
 	}
 
 	private static class ATCommandReturn {

@@ -13,10 +13,10 @@ import org.slf4j.LoggerFactory;
 import at.ac.tuwien.mnsa.ue3.smsapp.csv.CsvServiceFactory;
 import at.ac.tuwien.mnsa.ue3.smsapp.sms.Sms;
 
-public class SMSCsvServiceTest {
+public class SmsCsvServiceTest {
 
 	private static final Logger log = LoggerFactory
-			.getLogger(SMSCsvServiceTest.class);
+			.getLogger(SmsCsvServiceTest.class);
 
 	private static List<Sms> smsList;
 

@@ -11,7 +11,7 @@ import java.util.Properties;
  * @author klaus
  * 
  */
-public class SMSPropertiesService implements PropertiesService {
+public class SmsPropertiesService implements PropertiesService {
 	private static final String PROPERTIES_FILE = "sendsms.properties";
 
 	public static final String PORT_KEY = "port";
@@ -25,12 +25,12 @@ public class SMSPropertiesService implements PropertiesService {
 	private Properties prop;
 
 	// Private constructor prevents instantiation from other classes
-	private SMSPropertiesService() {
+	private SmsPropertiesService() {
 		prop = null;
 	}
 
 	private static class PropertiesServiceHolder {
-		public static final PropertiesService INSTANCE = new SMSPropertiesService();
+		public static final PropertiesService INSTANCE = new SmsPropertiesService();
 	}
 
 	static PropertiesService getInstance() {
