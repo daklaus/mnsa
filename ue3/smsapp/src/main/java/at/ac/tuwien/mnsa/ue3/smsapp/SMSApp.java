@@ -41,11 +41,11 @@ public class SMSApp {
 				List<SMS> smsList = CsvServiceFactory.getCsvService()
 						.getSMSList();
 
-				log.debug("The following SMS will be sent:");
-				for (SMS sms : smsList) {
-					log.debug("Recipient: \"{}\", Message: \"{}\"",
-							sms.getRecipient(), sms.getMessage());
-				}
+				// log.debug("The following SMS will be sent:");
+				// for (SMS sms : smsList) {
+				// log.debug("Recipient: \"{}\", Message: \"{}\"",
+				// sms.getRecipient(), sms.getMessage());
+				// }
 
 				log.debug("Opening Serial Port...");
 				serialPort = (SerialPort) CommPortIdentifier.getPortIdentifier(
@@ -61,6 +61,8 @@ public class SMSApp {
 
 				log.debug("Bringing telephone up to speed...");
 				initializeTelephone();
+
+				// TODO Send the sms ;)
 
 			} finally {
 				close();
@@ -252,7 +254,8 @@ public class SMSApp {
 	 */
 	private static void resetTelephone() {
 		// Doing 3 times, just to be sure... ;) 1 times doesn't work 100%
-		sendATCommand("\u001aATZ");
+		sendATCommand("\u001a");
+		sendATCommand("ATZ");
 		sendATCommand("ATZ");
 		sendATCommand("ATZ");
 	}
@@ -277,27 +280,27 @@ public class SMSApp {
 		String answer = "";
 		String returnCode = "";
 		boolean first = true;
+		boolean readOn = true;
 
 		log.debug("Sending \"{}\"", command);
 		writer.write(command + "\r\n");
 		writer.flush();
 
-		// TODO This is suboptimal, maybe there is a cleaner implementation for
-		// this. CHO: I know, also tried scanner (with "hasNext()") and so on,
-		// but couldn't find a "good" (non-workaround) solution... So I used
-		// exceptions.
-		while (true) {
+		while (readOn) {
 			try {
-				if (first) {
-					returnCode = reader.readLine();
-					answer = returnCode;
-					first = false;
+				returnCode = reader.readLine();
+
+				// The return code is always the last line; the answer is
+				// everything read
+				if (!first) {
+					answer += "\n";
 				} else {
-					returnCode = reader.readLine();
-					answer = answer + "\n" + returnCode;
+					first = false;
 				}
+				answer += returnCode;
+
 			} catch (IOException e) {
-				break;
+				readOn = false;
 			}
 		}
 

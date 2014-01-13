@@ -22,8 +22,6 @@ public class SMSPropertiesService implements PropertiesService {
 
 	public static final String SMSC_KEY = "smsc";
 
-//	public static final String RECIPIENT_KEY = "recipient"; TODO delete
-
 	private Properties prop;
 
 	// Private constructor prevents instantiation from other classes

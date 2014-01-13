@@ -58,7 +58,6 @@ public class SMSAppTest {
 
 //	@Test
 //	public void sendPduSMS() {
-//		// TODO whole stuff
 //	}
 //
 //	@Test

@@ -5,7 +5,6 @@ port=COM1
 # Optional Parameters
 #####################
 pin=1234
-recipient=+436647654321
 smsc=+436641234567
 
 # Other Austrian SMSC telephone numbers (international convention):

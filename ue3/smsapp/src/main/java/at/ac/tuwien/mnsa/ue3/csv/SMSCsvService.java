@@ -68,25 +68,25 @@ public class SMSCsvService implements CsvService {
 			// Read contents per line...
 			while ((line = reader.readNext()) != null) {
 
-				if (line.length == 2) {
-					// Check for correctness of recipient and message
-					try {
-						rawSms = checkRawSms(line[0], line[1]);
-
-						// Create a SMS and save it into the smsList
-						log.info("SMS going to be saved.");
-						smsList.add(new SMS(rawSms[0], rawSms[1]));
-
-					} catch (IllegalArgumentException e) {
-						log.error("Error while parsing: {}", e.getMessage());
-					}
-
-				} else
+				if (line.length != 2) {
 					log.error(
 							"Values of the line should count 2 but the actual number is {}",
 							line.length);
+					continue;
+				}
 
-				log.info(" ");
+				// Check for correctness of recipient and message
+				try {
+					rawSms = checkRawSms(line[0], line[1]);
+
+					// Create a SMS and save it into the smsList
+					log.info("SMS going to be saved.");
+					smsList.add(new SMS(rawSms[0], rawSms[1]));
+
+				} catch (IllegalArgumentException e) {
+					log.error("Error while parsing: {}", e.getMessage());
+				}
+
 			}
 
 		} catch (FileNotFoundException e) {
