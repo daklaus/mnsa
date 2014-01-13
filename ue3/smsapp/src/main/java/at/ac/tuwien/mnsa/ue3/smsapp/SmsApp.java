@@ -12,6 +12,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.ac.tuwien.common.binary.NumberConverter;
 import at.ac.tuwien.mnsa.ue3.smsapp.csv.CsvServiceFactory;
 import at.ac.tuwien.mnsa.ue3.smsapp.properties.PropertiesServiceFactory;
 import at.ac.tuwien.mnsa.ue3.smsapp.properties.SmsPropertiesService;
@@ -39,15 +40,9 @@ public class SmsApp {
 				log.debug("Getting properties...");
 				String comPort = getComPort();
 
-				log.debug("Loading Sms list...");
+				log.debug("Loading SMS list...");
 				List<Sms> smsList = CsvServiceFactory.getCsvService()
 						.getSMSList();
-
-				// log.debug("The following Sms will be sent:");
-				// for (Sms sms : smsList) {
-				// log.debug("Recipient: \"{}\", Message: \"{}\"",
-				// sms.getRecipient(), sms.getMessage());
-				// }
 
 				log.debug("Opening Serial Port...");
 				serialPort = (SerialPort) CommPortIdentifier.getPortIdentifier(
@@ -64,6 +59,7 @@ public class SmsApp {
 				log.debug("Bringing telephone up to speed...");
 				initializeTelephone();
 
+				ATCommandReturn cmdReturn;
 				for (Sms sms : smsList) {
 					log.info("Processing SMS to \"" + sms.getRecipient()
 							+ "\": \"" + sms.getMessage() + "\"");
@@ -76,7 +72,21 @@ public class SmsApp {
 					log.debug("SMS got " + parts.size() + " parts.");
 
 					for (SmsDataPart smsDataPart : parts) {
-						// TODO Send the sms part ;)
+
+						// Initiating the SMS sending by sending the number of
+						// bytes to be sent
+						sendATCommand("AT+CMGS="
+								+ smsDataPart.getMsgByteLengthWithoutSmscPart());
+
+						// Send the PDU terminated with a SUB character (hex 1A,
+						// on keyboard Ctrl+Z)
+						cmdReturn = sendATCommand(
+								NumberConverter
+										.bytesToHex(smsDataPart.getPdu()),
+								"\u001a");
+
+						// Maybe we should check the return code or something,
+						// but we cannot do anything anyway
 					}
 				}
 
@@ -291,6 +301,20 @@ public class SmsApp {
 	}
 
 	/**
+	 * Sends an AT command like {@link #sendATCommand(String, String)}
+	 * specifying a carriage return (CR) followed by a line feed (LF) as
+	 * terminator (i.e. "\r\n").
+	 * 
+	 * @param command
+	 *            see {@link #sendATCommand(String, String)}
+	 * 
+	 * @see #sendATCommand(String, String)
+	 */
+	private static ATCommandReturn sendATCommand(String command) {
+		return sendATCommand(command, "\r\n");
+	}
+
+	/**
 	 * Sends the specified AT Command to the globally specified COM Port,
 	 * including the option to wait specified milliseconds for the answer
 	 * 
@@ -299,14 +323,15 @@ public class SmsApp {
 	 * @return String[] containing the answer ([0]) and the Return-Code ([1])
 	 *         from the telephone
 	 */
-	private static ATCommandReturn sendATCommand(String command) {
+	private static ATCommandReturn sendATCommand(String command,
+			String commandTerminator) {
 		String answer = "";
 		String returnCode = "";
 		boolean first = true;
 		boolean readOn = true;
 
 		log.debug("Sending \"{}\"", command);
-		writer.write(command + "\r\n");
+		writer.write(command + commandTerminator);
 		writer.flush();
 
 		while (readOn) {
