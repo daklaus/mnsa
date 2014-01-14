@@ -142,7 +142,7 @@ public class SmsService {
 		// Calculate 7-Bit number
 		number7BitRaw = new char[number.length()];
 
-		for (int i = 0; i < number.length(); ++i) {
+		for (int i = 0; i < number.length(); i++) {
 			if (i % 2 == 0) {
 				number7BitRaw[i] = number.charAt(i + 1);
 			} else {
