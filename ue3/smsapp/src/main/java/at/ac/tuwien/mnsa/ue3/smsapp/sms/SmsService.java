@@ -84,12 +84,18 @@ public class SmsService {
 
 	// TODO For Klaus ;)
 	static byte[] encodeMsgInSeptets(String msg) {
-		// TODO stub method
+		byte[] bMsg = convertWith7BitAlphabet(msg);
 
-		// TODO do your thing
+		// TODO stub method
 
 		// "Test PDU" without UDH padding
 		return NumberConverter.hexStringToBytes("D4F29C0E8212AB");
+	}
+
+	// TODO For Christian ;)
+	private static byte[] convertWith7BitAlphabet(String msg) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	// TODO For Christian ;)

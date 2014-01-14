@@ -2,6 +2,7 @@ package at.ac.tuwien.common.binary;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.BitSet;
 
 public class NumberConverter {
 
@@ -166,7 +167,8 @@ public class NumberConverter {
 	}
 
 	/**
-	 * Helps to know what bit is at some position in some number
+	 * Helps to know what bit is at some position in some number. Maybe you
+	 * should also take a look at {@link BitSet}.
 	 * 
 	 * @param number
 	 *            in which we search a bit
@@ -188,7 +190,8 @@ public class NumberConverter {
 	}
 
 	/**
-	 * Set bit at a specific position
+	 * Set bit at a specific position. Maybe you should also take a look at
+	 * {@link BitSet}.
 	 * 
 	 * @param index
 	 *            the index starting from the right (LSB)
@@ -203,7 +206,8 @@ public class NumberConverter {
 	}
 
 	/**
-	 * Set bit at a specific position
+	 * Set bit at a specific position. Maybe you should also take a look at
+	 * {@link BitSet}.
 	 * 
 	 * @param index
 	 *            the index starting from the right (LSB)
