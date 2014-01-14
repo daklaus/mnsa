@@ -1,4 +1,4 @@
-package at.ac.tuwien.mnsa.ue3.csv;
+package at.ac.tuwien.mnsa.ue3.smsapp.csv;
 
 import static org.junit.Assert.*;
 

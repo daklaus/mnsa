@@ -92,7 +92,7 @@ public class SmsService {
 	}
 
 	// TODO For Christian ;)
-	private static byte[] encodeMsgInSeptets(String msg, boolean withUdhPadding) {
+	static byte[] encodeMsgInSeptets(String msg, boolean withUdhPadding) {
 		// TODO stub method
 
 		// TODO do things before UDH padding (conversion to hex or binary or
@@ -113,7 +113,7 @@ public class SmsService {
 	}
 
 	// TODO For Christian ;)
-	private static byte[] encodeInternationalNumberInSemiOctets(String number) {
+	static byte[] encodeInternationalNumberInSemiOctets(String number) {
 		// TODO stub method
 
 		// Klaus' number: +436646311689
