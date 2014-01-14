@@ -97,7 +97,7 @@ public class SmsServiceTest {
 		assertArrayEquals(NumberConverter.hexStringToBytes("0B913466348080F2"),
 				SmsService
 						.encodeInternationalNumberInSemiOctets("+43664308082"));
-		
+
 		// Telephone number: +436646311689
 		assertArrayEquals(NumberConverter.hexStringToBytes("0C91346664136198"),
 				SmsService

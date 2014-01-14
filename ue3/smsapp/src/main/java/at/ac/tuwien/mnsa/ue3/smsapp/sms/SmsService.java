@@ -3,6 +3,10 @@ package at.ac.tuwien.mnsa.ue3.smsapp.sms;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
+import com.google.common.primitives.Bytes;
+
 import at.ac.tuwien.common.binary.NumberConverter;
 
 public class SmsService {
@@ -25,6 +29,157 @@ public class SmsService {
 			- UDH_LENGHT_IN_SEPTETTS;
 
 	private static final String INT_NUMBER_FORMAT = "91";
+
+	private static final BiMap<Character, Byte> GSM0338_ALPHABET;
+
+	private static final BiMap<Character, Byte> GSM0338_ALPHABET_EXTENSION;
+
+	static {
+		GSM0338_ALPHABET = new ImmutableBiMap.Builder<Character, Byte>()
+				// 0x00 - 0x0F
+				.put('@', (byte) 0x00)
+				.put('£', (byte) 0x01)
+				.put('$', (byte) 0x02)
+				.put('¥', (byte) 0x03)
+				.put('è', (byte) 0x04)
+				.put('é', (byte) 0x05)
+				.put('ù', (byte) 0x06)
+				.put('ì', (byte) 0x07)
+				.put('ò', (byte) 0x08)
+				.put('Ç', (byte) 0x09)
+				.put('\n', (byte) 0x0A)
+				.put('Ø', (byte) 0x0B)
+				.put('ø', (byte) 0x0C)
+				.put('\r', (byte) 0x0D)
+				.put('Å', (byte) 0x0E)
+				.put('å', (byte) 0x0F)
+
+				// 0x10 - 0x1F
+				.put('Δ', (byte) 0x10)
+				.put('_', (byte) 0x11)
+				.put('Φ', (byte) 0x12)
+				.put('Γ', (byte) 0x13)
+				.put('Λ', (byte) 0x14)
+				.put('Ω', (byte) 0x15)
+				.put('Π', (byte) 0x16)
+				.put('Ψ', (byte) 0x17)
+				.put('Σ', (byte) 0x18)
+				.put('Θ', (byte) 0x19)
+				.put('Ξ', (byte) 0x1A)
+				.put('\u001B', (byte) 0x1B)
+				.put('Æ', (byte) 0x1C)
+				.put('æ', (byte) 0x1D)
+				.put('ß', (byte) 0x1E)
+				.put('É', (byte) 0x1F)
+
+				// 0x20 - 0x2F
+				.put(' ', (byte) 0x20)
+				.put('!', (byte) 0x21)
+				.put('"', (byte) 0x22)
+				.put('#', (byte) 0x23)
+				.put('¤', (byte) 0x24)
+				.put('%', (byte) 0x25)
+				.put('&', (byte) 0x26)
+				.put('\'', (byte) 0x27)
+				.put('(', (byte) 0x28)
+				.put(')', (byte) 0x29)
+				.put('*', (byte) 0x2A)
+				.put('+', (byte) 0x2B)
+				.put(',', (byte) 0x2C)
+				.put('-', (byte) 0x2D)
+				.put('.', (byte) 0x2E)
+				.put('/', (byte) 0x2F)
+
+				// 0x30 - 0x3F
+				.put('0', (byte) 0x30)
+				.put('1', (byte) 0x31)
+				.put('2', (byte) 0x32)
+				.put('3', (byte) 0x33)
+				.put('4', (byte) 0x34)
+				.put('5', (byte) 0x35)
+				.put('6', (byte) 0x36)
+				.put('7', (byte) 0x37)
+				.put('8', (byte) 0x38)
+				.put('9', (byte) 0x39)
+				.put(':', (byte) 0x3A)
+				.put(';', (byte) 0x3B)
+				.put('<', (byte) 0x3C)
+				.put('=', (byte) 0x3D)
+				.put('>', (byte) 0x3E)
+				.put('?', (byte) 0x3F)
+
+				// 0x40 - 0x4F
+				.put('¡', (byte) 0x40)
+				.put('A', (byte) 0x41)
+				.put('B', (byte) 0x42)
+				.put('C', (byte) 0x43)
+				.put('D', (byte) 0x44)
+				.put('E', (byte) 0x45)
+				.put('F', (byte) 0x46)
+				.put('G', (byte) 0x47)
+				.put('H', (byte) 0x48)
+				.put('I', (byte) 0x49)
+				.put('J', (byte) 0x4A)
+				.put('K', (byte) 0x4B)
+				.put('L', (byte) 0x4C)
+				.put('M', (byte) 0x4D)
+				.put('N', (byte) 0x4E)
+				.put('O', (byte) 0x4F)
+
+				// 0x50 - 0x5F
+				.put('P', (byte) 0x50)
+				.put('Q', (byte) 0x51)
+				.put('R', (byte) 0x52)
+				.put('S', (byte) 0x53)
+				.put('T', (byte) 0x54)
+				.put('U', (byte) 0x55)
+				.put('V', (byte) 0x56)
+				.put('W', (byte) 0x57)
+				.put('X', (byte) 0x58)
+				.put('Y', (byte) 0x59)
+				.put('Z', (byte) 0x5A)
+				.put('Ä', (byte) 0x5B)
+				.put('Ö', (byte) 0x5C)
+				.put('Ñ', (byte) 0x5D)
+				.put('Ü', (byte) 0x5E)
+				.put('§', (byte) 0x5F)
+
+				// 0x60 - 0x6F
+				.put('¿', (byte) 0x60).put('a', (byte) 0x61)
+				.put('b', (byte) 0x62).put('c', (byte) 0x63)
+				.put('d', (byte) 0x64)
+				.put('e', (byte) 0x65)
+				.put('f', (byte) 0x66)
+				.put('g', (byte) 0x67)
+				.put('h', (byte) 0x68)
+				.put('i', (byte) 0x69)
+				.put('j', (byte) 0x6A)
+				.put('k', (byte) 0x6B)
+				.put('l', (byte) 0x6C)
+				.put('m', (byte) 0x6D)
+				.put('n', (byte) 0x6E)
+				.put('o', (byte) 0x6F)
+
+				// 0x70 - 0x7F
+				.put('p', (byte) 0x70).put('q', (byte) 0x71)
+				.put('r', (byte) 0x72).put('s', (byte) 0x73)
+				.put('t', (byte) 0x74).put('u', (byte) 0x75)
+				.put('v', (byte) 0x76).put('w', (byte) 0x77)
+				.put('x', (byte) 0x78).put('y', (byte) 0x79)
+				.put('z', (byte) 0x7A).put('ä', (byte) 0x7B)
+				.put('ö', (byte) 0x7C).put('ñ', (byte) 0x7D)
+				.put('ü', (byte) 0x7E).put('à', (byte) 0x7F).build();
+
+		GSM0338_ALPHABET_EXTENSION = new ImmutableBiMap.Builder<Character, Byte>()
+				.put('\u000c', (byte) 0x0A)
+				// .put('', (byte) 0x0D) CR2
+				.put('^', (byte) 0x14)
+				// .put('', (byte) 0x1B) SS2
+				.put('{', (byte) 0x28).put('}', (byte) 0x29)
+				.put('\\', (byte) 0x2F).put('[', (byte) 0x3C)
+				.put('~', (byte) 0x3D).put(']', (byte) 0x3E)
+				.put('|', (byte) 0x40).put('€', (byte) 0x65).build();
+	}
 
 	/**
 	 * Assembles the a list of SMS parts (each containing max. 160 characters of
@@ -103,10 +258,44 @@ public class SmsService {
 		return NumberConverter.hexStringToBytes("D4F29C0E8212AB");
 	}
 
-	// TODO For Christian ;)
+	/**
+	 * Converts a String into a byte-Array using the GSM 03.38 alphabet (Basic
+	 * Character set with extensions)
+	 * 
+	 * @param msg
+	 *            The message being converted
+	 * @return byte[] representation of the converted String
+	 */
 	static byte[] convertWith7BitAlphabet(String msg) {
-		// TODO Auto-generated method stub
-		return null;
+		char tempChar;
+		List<Byte> msgByteList;
+
+		// Initialize Byte ArrayList
+		msgByteList = new ArrayList<Byte>();
+
+		// Loop through all characters of msg
+		for (int i = 0; i < msg.length(); i++) {
+
+			// Store current char
+			tempChar = msg.charAt(i);
+
+			// if the Basic GSM 03.38 alphabet contains the key, store it
+			// into the list...
+			if (GSM0338_ALPHABET.containsKey(tempChar)) {
+				msgByteList.add(GSM0338_ALPHABET.get(tempChar));
+
+			} else {
+
+				// ..., if not, search it in the extensions of the GSM 03.38
+				// alphabet and store it into the list
+				if (GSM0338_ALPHABET_EXTENSION.containsKey(tempChar)) {
+					msgByteList.add((byte) 0x1B);
+					msgByteList.add(GSM0338_ALPHABET_EXTENSION.get(tempChar));
+				}
+			}
+		}
+
+		return Bytes.toArray(msgByteList);
 	}
 
 	/**
