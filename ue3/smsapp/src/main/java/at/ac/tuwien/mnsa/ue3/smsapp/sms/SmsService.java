@@ -8,7 +8,7 @@ import at.ac.tuwien.common.binary.NumberConverter;
 public class SmsService {
 
 	// PDU constants
-	private static final byte DEFAULT_SMSC = (byte) 0x00;
+	private static final byte[] DEFAULT_SMSC = new byte[] { (byte) 0x00 };
 	private static final byte DEFAULT_PDU_HEADER = (byte) 0x11; // MTI set to
 																// SMS-SUBMIT
 																// and VPF set
@@ -40,7 +40,7 @@ public class SmsService {
 		if (msg.length() <= MAXIMUM_CHARS_IN_SINGLEPART) {
 			// Send message as single SMS without UDH
 			// Generate PDU for the SMS using the default PDU header and no UDH
-			SmsDataPart sdp = new SmsDataPart(sms, new byte[] { DEFAULT_SMSC },
+			SmsDataPart sdp = new SmsDataPart(sms, DEFAULT_SMSC,
 					DEFAULT_PDU_HEADER, DEFAULT_MESSAGE_REFERENCE,
 					encodeInternationalNumberInSemiOctets(sms.getRecipient()),
 					DEFAULT_PROTOCOL_IDENTIFIER, DEFAULT_DATA_CODING_SCHEME,
@@ -68,7 +68,7 @@ public class SmsService {
 
 			// Generate the PDU for each part for sending as a concatenated SMS
 			// with the PDUs containing a UDH for reassembling
-			SmsDataPart sdp = new SmsDataPart(sms, new byte[] { DEFAULT_SMSC },
+			SmsDataPart sdp = new SmsDataPart(sms, DEFAULT_SMSC,
 					pduHearder, DEFAULT_MESSAGE_REFERENCE,
 					encodeInternationalNumberInSemiOctets(sms.getRecipient()),
 					DEFAULT_PROTOCOL_IDENTIFIER, DEFAULT_DATA_CODING_SCHEME,
