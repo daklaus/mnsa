@@ -88,16 +88,16 @@ public class SmsApp {
 						// on keyboard Ctrl+Z)
 						cmdReturn = sendATCommand(
 								NumberConverter
-										.bytesToHex(smsDataPart.getPdu()),
+										.bytesToHexString(smsDataPart.getPdu()),
 								"\u001a", WAIT_FOR_SEND_REPLY);
 
 						// Check if the SMS part was sent successfully
 						if (cmdReturn.getReturnCode().contains("OK")) {
-							msg = "Part " + i + 1 + " of " + parts.size()
+							msg = "Part " + (i + 1) + " of " + parts.size()
 									+ " successfully sent!";
 						} else {
 							msg = "Something went wrong while sending part "
-									+ i + 1 + " of " + parts.size()
+									+ (i + 1) + " of " + parts.size()
 									+ ". Got answer: " + cmdReturn.getAnswer();
 						}
 						System.out.println(msg);

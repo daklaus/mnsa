@@ -1,7 +1,5 @@
 package at.ac.tuwien.mnsa.ue3.smsapp.csv;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -15,22 +13,22 @@ import at.ac.tuwien.mnsa.ue3.smsapp.properties.SmsPropertiesService;
 import at.ac.tuwien.mnsa.ue3.smsapp.sms.Sms;
 import au.com.bytecode.opencsv.CSVReader;
 
-public class SMSCsvService implements CsvService {
+public class SmsCsvService implements CsvService {
 
 	private static final char SEPERATOR = ',';
 
 	private static final Logger log = LoggerFactory
-			.getLogger(SMSCsvService.class);
+			.getLogger(SmsCsvService.class);
 
 	private List<Sms> smsList;
 
 	// Private constructor prevents instantiation from other classes
-	private SMSCsvService() {
+	private SmsCsvService() {
 		smsList = null;
 	}
 
 	private static class CsvServiceHolder {
-		public static final CsvService INSTANCE = new SMSCsvService();
+		public static final CsvService INSTANCE = new SmsCsvService();
 	}
 
 	static CsvService getInstance() {
