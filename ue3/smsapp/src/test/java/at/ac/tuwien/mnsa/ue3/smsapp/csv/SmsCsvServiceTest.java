@@ -18,17 +18,17 @@ public class SmsCsvServiceTest {
 	private static final Logger log = LoggerFactory
 			.getLogger(SmsCsvServiceTest.class);
 
-	private static List<Sms> smsList;
-
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-
-		smsList = CsvServiceFactory.getCsvService().getSMSList();
 	}
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
 	}
-	
-	// TODO Make the class more testable and add tests
+
+	// TODO test the class
+	// 1. Instantiate the class
+	// 2. Make StringReader with sample CSV data
+	// 3. Invoke the loadSms(Reader, String)
+	// 4. Test the outcome
 }

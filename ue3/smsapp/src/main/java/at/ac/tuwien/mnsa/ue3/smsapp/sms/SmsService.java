@@ -201,6 +201,8 @@ public class SmsService {
 
 		List<SmsDataPart> parts = new ArrayList<SmsDataPart>();
 		byte[] msg = convertWith7BitAlphabet(sms.getMessage());
+		if (msg == null || msg.length <= 0)
+			return parts;
 
 		// Calculate common fields
 		byte[] smscInfo = DEFAULT_SMSC;
@@ -255,15 +257,18 @@ public class SmsService {
 		return parts;
 	}
 
-	// TODO For Klaus ;)
+	/**
+	 * Converts a message encoded in the 7 bit alphabet (according to GSM 03.38)
+	 * to the PDU encoding.
+	 * 
+	 * @param msg
+	 *            the message encoded with the 7-bit alphabet
+	 * @return the byte array conatining the septets of the message
+	 */
 	static byte[] encodeMsgInSeptets(byte[] msg) {
-
 		if (msg == null || msg.length <= 0) {
 			return new byte[] {};
 		}
-		// in 7 bit alphabet ABC = 414243 = 0100_0001 0100_0010 0100_0011 =
-		// 1000001 1000010 1000011
-		// back: ABC = 41e110 = 01000001 11100001 00010000
 
 		// Hint: BitMap indexing starts at the most significant octet (byte)
 		// (form left) but in the octets from the LSB means from the right
