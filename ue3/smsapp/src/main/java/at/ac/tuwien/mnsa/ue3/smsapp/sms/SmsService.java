@@ -317,6 +317,9 @@ public class SmsService {
 	 * @return byte[] representation of the converted String
 	 */
 	static byte[] convertWith7BitAlphabet(String msg) {
+		if(msg == null)
+			throw new IllegalArgumentException("The message is null");
+		
 		char tempChar;
 		List<Byte> msgByteList;
 
