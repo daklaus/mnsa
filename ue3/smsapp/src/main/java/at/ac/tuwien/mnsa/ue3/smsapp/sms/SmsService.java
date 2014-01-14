@@ -19,18 +19,7 @@ public class SmsService {
 	private static final byte DEFAULT_DATA_CODING_SCHEME = (byte) 0x00;
 	private static final byte DEFAULT_VALIDITY_PERIOD = (byte) 0xA7;
 
-	// UDH constants
-	private static final byte DEFAULT_UDH_LENGTH = (byte) 0x05;
-	private static final byte DEFAULT_INFORMATION_ELEMENT_IDENTIFIER = (byte) 0x00; // Concatenated
-																					// short
-																					// message
-																					// w/
-																					// 8-bit
-																					// reference
-																					// number
-	private static final byte DEFAULT_LENGTH_OF_HEADER = (byte) 0x03;
-
-	private static final int MAXIMUM_CHARS_IN_MULTIPART = 153;
+	private static final int MAXIMUM_CHARS_IN_MULTIPART = 152;
 	private static final int MAXIMUM_CHARS_IN_SINGLEPART = 160;
 
 	/**
@@ -56,7 +45,7 @@ public class SmsService {
 					encodeInternationalNumberInSemiOctets(sms.getRecipient()),
 					DEFAULT_PROTOCOL_IDENTIFIER, DEFAULT_DATA_CODING_SCHEME,
 					DEFAULT_VALIDITY_PERIOD, (byte) msg.length(),
-					encodeMsgInSeptets(msg, false));
+					encodeMsgInSeptets(msg));
 
 			parts.add(sdp);
 			return parts;
@@ -65,8 +54,8 @@ public class SmsService {
 		// Split the message into parts
 		int numParts = msg.length() / MAXIMUM_CHARS_IN_MULTIPART + 1;
 
-		// TODO generate the reference number with a random generator
-		byte csmsReferenceNumber = (byte) 0x00;
+		// TODO Generate the reference number with a random generator
+		byte[] csmsReferenceNumber = new byte[] { (byte) 0x00, (byte) 0x00 };
 		// Sets the UDHI bit in the PDU header
 		byte pduHearder = NumberConverter.setBit(6, DEFAULT_PDU_HEADER);
 
@@ -74,8 +63,8 @@ public class SmsService {
 			String msgPart = msg.substring(i * MAXIMUM_CHARS_IN_MULTIPART, Math
 					.min((i + 1) * MAXIMUM_CHARS_IN_MULTIPART, msg.length()));
 
-			// Add seven septets (6 bytes + 1 bit padding) for the UDH
-			byte userDataLength = (byte) (msgPart.length() + 7);
+			// Add 8 septetts (7 bytes) for the UDH
+			byte userDataLength = (byte) (msgPart.length() + (MAXIMUM_CHARS_IN_SINGLEPART - MAXIMUM_CHARS_IN_MULTIPART));
 
 			// Generate the PDU for each part for sending as a concatenated SMS
 			// with the PDUs containing a UDH for reassembling
@@ -85,7 +74,7 @@ public class SmsService {
 					DEFAULT_PROTOCOL_IDENTIFIER, DEFAULT_DATA_CODING_SCHEME,
 					DEFAULT_VALIDITY_PERIOD, userDataLength,
 					csmsReferenceNumber, (byte) numParts, (byte) (i + 1),
-					encodeMsgInSeptets(msgPart, true));
+					encodeMsgInSeptets(msgPart));
 
 			parts.add(sdp);
 		}
@@ -93,20 +82,9 @@ public class SmsService {
 		return parts;
 	}
 
-	// TODO For Christian ;)
-	static byte[] encodeMsgInSeptets(String msg, boolean withUdhPadding) {
+	// TODO For Klaus ;)
+	static byte[] encodeMsgInSeptets(String msg) {
 		// TODO stub method
-
-		// TODO do things before UDH padding (conversion to hex or binary or
-		// something)
-
-		if (withUdhPadding) {
-			// Do something for UDH padding
-			// Since our UDH is always 6 bytes (48 bits) long the padding to
-			// septets (multiply of 7 - to 49) will always be one bit
-
-			return null;
-		}
 
 		// TODO do your thing
 

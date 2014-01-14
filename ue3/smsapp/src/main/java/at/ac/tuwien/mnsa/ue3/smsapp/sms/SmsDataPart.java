@@ -3,9 +3,16 @@ package at.ac.tuwien.mnsa.ue3.smsapp.sms;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import at.ac.tuwien.common.binary.NumberConverter;
-
 public class SmsDataPart {
+	// UDH constants
+	/**
+	 * Concatenated short message w/ 16-bit reference number
+	 */
+	private static final byte INFORMATION_ELEMENT_IDENTIFIER_16BIT_CSMS = (byte) 0x08;
+	/**
+	 * Concatenated short message w/ 8-bit reference number
+	 */
+	private static final byte INFORMATION_ELEMENT_IDENTIFIER_8BIT_CSMS = (byte) 0x00;
 
 	// PDU header
 	private final Sms parentSms;
@@ -22,7 +29,7 @@ public class SmsDataPart {
 	private final byte userDataHeaderLength;
 	private final byte informationElementIdentifier;
 	private final byte informationElementLenght; // UDH length - 2
-	private final byte csmsReferenceNumber;
+	private final byte[] csmsReferenceNumber;
 	private final byte noOfParts;
 	private final byte partNo;
 
@@ -37,11 +44,15 @@ public class SmsDataPart {
 	public SmsDataPart(Sms parentSms, byte[] smscInfo, byte pduHeader,
 			byte messageReference, byte[] encodedDestinationAddress,
 			byte protocolIdentifier, byte dataCodingScheme,
-			byte validityPeriod, byte userDataLength, byte csmsReferenceNumber,
-			byte noOfParts, byte partNo, byte[] encodedMsg) {
+			byte validityPeriod, byte userDataLength,
+			byte[] csmsReferenceNumber, byte noOfParts, byte partNo,
+			byte[] encodedMsg) {
 
 		if (parentSms == null)
 			throw new IllegalArgumentException("parentSms is null");
+		if (csmsReferenceNumber == null || csmsReferenceNumber.length != 2)
+			throw new IllegalArgumentException(
+					"The CSMS reference number in the UDH has to consist of exactly two bytes.");
 		// TODO check all the parameters for null, valid length, valid values,
 		// ...
 
@@ -58,8 +69,8 @@ public class SmsDataPart {
 
 		// UDH
 		this.hasUdh = true;
-		this.userDataHeaderLength = 5;
-		this.informationElementIdentifier = (byte) 0x00;
+		this.userDataHeaderLength = (byte) (csmsReferenceNumber.length + 4);
+		this.informationElementIdentifier = INFORMATION_ELEMENT_IDENTIFIER_16BIT_CSMS;
 		this.informationElementLenght = (byte) (userDataHeaderLength - 2);
 		this.csmsReferenceNumber = csmsReferenceNumber;
 		this.noOfParts = noOfParts;
@@ -97,7 +108,7 @@ public class SmsDataPart {
 		this.userDataHeaderLength = 0;
 		this.informationElementIdentifier = 0;
 		this.informationElementLenght = 0;
-		this.csmsReferenceNumber = 0;
+		this.csmsReferenceNumber = null;
 		this.noOfParts = 0;
 		this.partNo = 0;
 
@@ -138,9 +149,18 @@ public class SmsDataPart {
 		if (!hasUdh)
 			return null;
 
-		return new byte[] { userDataHeaderLength, informationElementIdentifier,
-				informationElementLenght, csmsReferenceNumber, noOfParts,
-				partNo };
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		try {
+			outputStream.write(userDataHeaderLength);
+			outputStream.write(informationElementIdentifier);
+			outputStream.write(informationElementLenght);
+			outputStream.write(csmsReferenceNumber);
+			outputStream.write(noOfParts);
+			outputStream.write(partNo);
+		} catch (IOException ignored) {
+		}
+
+		return outputStream.toByteArray();
 	}
 
 	public byte[] getSmscInfo() {
@@ -187,7 +207,7 @@ public class SmsDataPart {
 		return informationElementLenght;
 	}
 
-	public byte getCsmsReferenceNumber() {
+	public byte[] getCsmsReferenceNumber() {
 		return csmsReferenceNumber;
 	}
 
