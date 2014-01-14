@@ -79,12 +79,6 @@ public class SmsCsvService implements CsvService {
 					}
 
 					try {
-						// Check for correctness of recipient and message
-						// Is now done in the Sms class constructor (in a much
-						// more efficient and compact way)
-						// TODO delete this
-						// rawSms = checkRawSms(line[0], line[1]);
-
 						// Create a Sms and save it into the smsList
 						log.debug("Sms going to be saved.");
 						smsList.add(new Sms(line[0], line[1]));
@@ -108,41 +102,4 @@ public class SmsCsvService implements CsvService {
 		return smsList;
 	}
 
-	// TODO delete this
-	// private String[] checkRawSms(String recipient, String message)
-	// throws IllegalArgumentException, IndexOutOfBoundsException {
-	//
-	// // Trim whitespace of recipient and message...
-	// recipient = recipient.trim();
-	// message = message.trim();
-	//
-	// log.debug("Got recipient \"{}\" with message \"{}\"", recipient,
-	// message);
-	//
-	// // Check if recipient or message have 0 length...
-	// if ((recipient.equalsIgnoreCase("")) || (message.equalsIgnoreCase("")))
-	// throw new IllegalArgumentException(
-	// "No recipent or message specified");
-	//
-	// // Filter rn from the end of message...
-	// if (message.length() > 1) {
-	// if (message.substring(message.length() - 2, message.length())
-	// .contains("rn")) {
-	// message = message.substring(0, message.length() - 2);
-	// log.debug("Message without CRs: {}", message);
-	// }
-	// }
-	//
-	// // Check telephone number of recipient...
-	// if (recipient.length() > 1) {
-	// if ((!recipient.substring(0, 1).equalsIgnoreCase("+"))
-	// || (!recipient.substring(1).matches("\\d+(\\.\\d+)?")))
-	// throw new IllegalArgumentException(
-	// "Format of international telephone number not correct!");
-	// } else
-	// throw new IllegalArgumentException(
-	// "Format of international telephone number not correct! Telephone number is too short.");
-	//
-	// return new String[] { recipient, message };
-	// }
 }
