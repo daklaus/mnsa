@@ -68,8 +68,8 @@ public class SmsService {
 
 			// Generate the PDU for each part for sending as a concatenated SMS
 			// with the PDUs containing a UDH for reassembling
-			SmsDataPart sdp = new SmsDataPart(sms, DEFAULT_SMSC,
-					pduHearder, DEFAULT_MESSAGE_REFERENCE,
+			SmsDataPart sdp = new SmsDataPart(sms, DEFAULT_SMSC, pduHearder,
+					DEFAULT_MESSAGE_REFERENCE,
 					encodeInternationalNumberInSemiOctets(sms.getRecipient()),
 					DEFAULT_PROTOCOL_IDENTIFIER, DEFAULT_DATA_CODING_SCHEME,
 					DEFAULT_VALIDITY_PERIOD, userDataLength,

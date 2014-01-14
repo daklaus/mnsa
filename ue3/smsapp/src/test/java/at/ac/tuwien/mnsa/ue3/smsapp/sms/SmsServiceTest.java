@@ -8,6 +8,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import at.ac.tuwien.common.binary.NumberConverter;
+
 public class SmsServiceTest {
 
 	public SmsServiceTest() {
@@ -37,8 +39,21 @@ public class SmsServiceTest {
 
 	@Test
 	public void testEncodeMsgInSeptets() {
-		// TODO method stub
-		// fail("Not yet implemented");
+		assertArrayEquals("ABC", NumberConverter.hexStringToBytes("41E110"),
+				SmsService.encodeMsgInSeptets("ABC"));
+		assertArrayEquals("XD", NumberConverter.hexStringToBytes("5822"),
+				SmsService.encodeMsgInSeptets("XD"));
+		assertArrayEquals(";-)", NumberConverter.hexStringToBytes("BB560A"),
+				SmsService.encodeMsgInSeptets(";-)"));
+		assertArrayEquals("Test PDU",
+				NumberConverter.hexStringToBytes("D4F29C0E8212AB"),
+				SmsService.encodeMsgInSeptets("Test PDU"));
+		assertArrayEquals(
+				"This is a much longer version of a test string for testing longer messages",
+				NumberConverter
+						.hexStringToBytes("54747A0E4ACF416150BB3E4683D86FF7B92C07D9CBF279FAED06BDCDA030885E9ED34173BA3CED3E83CC6F39885E9ED3D3EE3388FD769FCB7250BB3C9F87CFE539"),
+				SmsService
+						.encodeMsgInSeptets("This is a much longer version of a test string for testing longer messages"));
 	}
 
 	@Test
