@@ -23,26 +23,12 @@ public class SmsCsvServiceTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 
-		// TODO Please do not log that much and please not in INFO level,
-		// maximal at DEBUG level
-		// log.debug("Setting up locale environment...");
-		// log.debug("Loading Sms list...");
 		smsList = CsvServiceFactory.getCsvService().getSMSList();
 	}
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
 	}
-
-	// TODO Since there are no assertions this unit test doesn't test anything!
-	// TODO The test is not independent from the resources (csv file)!
-	// @Test
-	// public void showSendableSMS() {
-	//
-	// log.debug("The following Sms will be sent:");
-	// for (Sms sms : smsList) {
-	// log.debug("Recipient: \"{}\", Message: \"{}\"", sms.getRecipient(),
-	// sms.getMessage());
-	// }
-	// }
+	
+	// TODO Make the class more testable and add tests
 }

@@ -87,9 +87,9 @@ public class SmsApp {
 						// Send the PDU terminated with a SUB character (hex 1A,
 						// on keyboard Ctrl+Z)
 						cmdReturn = sendATCommand(
-								NumberConverter
-										.bytesToHexString(smsDataPart.getPdu()),
-								"\u001a", WAIT_FOR_SEND_REPLY);
+								NumberConverter.bytesToHexString(smsDataPart
+										.getPdu()), "\u001a",
+								WAIT_FOR_SEND_REPLY);
 
 						// Check if the SMS part was sent successfully
 						if (cmdReturn.getReturnCode().contains("OK")) {
@@ -111,7 +111,7 @@ public class SmsApp {
 				close();
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e.getClass().getName() + ": " + e.getMessage());
 			throw e;
 		}
 	}

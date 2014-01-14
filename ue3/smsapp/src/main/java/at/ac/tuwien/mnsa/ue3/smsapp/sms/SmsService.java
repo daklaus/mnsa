@@ -1,6 +1,8 @@
 package at.ac.tuwien.mnsa.ue3.smsapp.sms;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.BitSet;
 import java.util.List;
 
 import com.google.common.collect.BiMap;
@@ -23,10 +25,14 @@ public class SmsService {
 	private static final byte DEFAULT_DATA_CODING_SCHEME = (byte) 0x00;
 	private static final byte DEFAULT_VALIDITY_PERIOD = (byte) 0xA7;
 
-	private static final int MAXIMUM_CHARS_IN_SINGLEPART = 160;
-	private static final int UDH_LENGHT_IN_SEPTETTS = 8;
-	private static final int MAXIMUM_CHARS_IN_MULTIPART = MAXIMUM_CHARS_IN_SINGLEPART
-			- UDH_LENGHT_IN_SEPTETTS;
+	private static final int MAXIMUM_SEPTETS_IN_SINGLEPART = 160;
+	private static final int UDH_LENGHT_IN_BYTES = 7;
+	private static final int UDH_LENGHT_IN_SEPTETS = (int) Math
+			.ceil((double) UDH_LENGHT_IN_BYTES / 7 * 8);
+	// private static final int MAXIMUM_BYTES_IN_SINGLEPART =
+	// MAXIMUM_SEPTETS_IN_SINGLEPART / 8 * 7;
+	private static final int MAXIMUM_SEPTETS_IN_MULTIPART = MAXIMUM_SEPTETS_IN_SINGLEPART
+			- UDH_LENGHT_IN_SEPTETS;
 
 	private static final String INT_NUMBER_FORMAT = "91";
 
@@ -194,7 +200,7 @@ public class SmsService {
 			throw new IllegalArgumentException("SMS is null");
 
 		List<SmsDataPart> parts = new ArrayList<SmsDataPart>();
-		String msg = sms.getMessage();
+		byte[] msg = convertWith7BitAlphabet(sms.getMessage());
 
 		// Calculate common fields
 		byte[] smscInfo = DEFAULT_SMSC;
@@ -207,12 +213,12 @@ public class SmsService {
 		byte dataCodingScheme = DEFAULT_DATA_CODING_SCHEME;
 		byte validityPeriod = DEFAULT_VALIDITY_PERIOD;
 
-		if (msg.length() <= MAXIMUM_CHARS_IN_SINGLEPART) {
+		if (msg.length <= MAXIMUM_SEPTETS_IN_SINGLEPART) {
 			// Send message as single SMS without UDH
 			// Generate PDU for the SMS using the default PDU header and no UDH
 			SmsDataPart sdp = new SmsDataPart(sms, smscInfo, pduHearder,
 					messageReference, encodedRecipient, protocolIdentifier,
-					dataCodingScheme, validityPeriod, (byte) msg.length(),
+					dataCodingScheme, validityPeriod, (byte) msg.length,
 					encodeMsgInSeptets(msg));
 
 			parts.add(sdp);
@@ -220,7 +226,7 @@ public class SmsService {
 		}
 
 		// Split the message into parts
-		int numParts = msg.length() / MAXIMUM_CHARS_IN_MULTIPART + 1;
+		int numParts = msg.length / MAXIMUM_SEPTETS_IN_MULTIPART + 1;
 
 		// TODO Generate the reference number with a random generator
 		byte[] csmsReferenceNumber = new byte[] { (byte) 0x00, (byte) 0x00 };
@@ -228,11 +234,12 @@ public class SmsService {
 		pduHearder = NumberConverter.setBit(6, pduHearder);
 
 		for (int i = 0; i < numParts; i++) {
-			String msgPart = msg.substring(i * MAXIMUM_CHARS_IN_MULTIPART, Math
-					.min((i + 1) * MAXIMUM_CHARS_IN_MULTIPART, msg.length()));
+			byte[] msgPart = Arrays.copyOfRange(msg, i
+					* MAXIMUM_SEPTETS_IN_MULTIPART, Math.min((i + 1)
+					* MAXIMUM_SEPTETS_IN_MULTIPART, msg.length));
 
-			// Add 8 septetts (7 bytes) for the UDH
-			byte userDataLength = (byte) (msgPart.length() + (UDH_LENGHT_IN_SEPTETTS));
+			// Add length of UDH
+			byte userDataLength = (byte) (msgPart.length + UDH_LENGHT_IN_SEPTETS);
 
 			// Generate the PDU for each part for sending as a concatenated SMS
 			// with the PDUs containing a UDH for reassembling
@@ -249,13 +256,51 @@ public class SmsService {
 	}
 
 	// TODO For Klaus ;)
-	static byte[] encodeMsgInSeptets(String msg) {
-		byte[] bMsg = convertWith7BitAlphabet(msg);
+	static byte[] encodeMsgInSeptets(byte[] msg) {
 
-		// TODO stub method
+		if (msg == null || msg.length <= 0) {
+			return new byte[] {};
+		}
+		// in 7 bit alphabet ABC = 414243 = 0100_0001 0100_0010 0100_0011 =
+		// 1000001 1000010 1000011
+		// back: ABC = 41e110 = 01000001 11100001 00010000
 
-		// "Test PDU" without UDH padding
-		return NumberConverter.hexStringToBytes("D4F29C0E8212AB");
+		// Hint: BitMap indexing starts at the most significant octet (byte)
+		// (form left) but in the octets from the LSB means from the right
+
+		BitSet outcome = new BitSet();
+		BitSet input = BitSet.valueOf(msg);
+
+		int outOctet = 0;
+		int outBit = 0;
+		int fromPos, toPos;
+
+		// Run through octets of input from left to right (from most significant
+		// octet to least significant octet)
+		for (int inOctet = 0; inOctet < msg.length; inOctet++) {
+			// Run through each bit in the octet from right to left (from LSB to
+			// MSB) ignoring the last (MSB)
+			for (int inBit = 0; inBit < 7; inBit++) {
+
+				// Calculate fromPos
+				fromPos = inOctet * 8 + inBit;
+
+				// Calculate toPos
+				toPos = outOctet * 8 + outBit;
+
+				// Copy the bits
+				outcome.set(toPos, input.get(fromPos));
+
+				// Advance counters
+				outBit++;
+				if (outBit >= 8) {
+					outOctet++;
+					outBit = 0;
+				}
+			}
+		}
+
+		return outcome.toByteArray();
 	}
 
 	/**
@@ -308,6 +353,11 @@ public class SmsService {
 	 * @return byte[] representation of the converted telephone number
 	 */
 	static byte[] encodeInternationalNumberInSemiOctets(String number) {
+		number = number.trim();
+		if (!number.matches("^\\+\\d{3,}"))
+			throw new IllegalArgumentException(
+					"The number is not in international format (e.g. +436641234567)");
+
 		char[] number7BitRaw;
 		String numberLengthHex;
 
