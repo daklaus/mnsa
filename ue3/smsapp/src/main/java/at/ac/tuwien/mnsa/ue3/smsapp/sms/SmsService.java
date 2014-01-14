@@ -21,6 +21,7 @@ public class SmsService {
 
 	private static final int MAXIMUM_CHARS_IN_MULTIPART = 152;
 	private static final int MAXIMUM_CHARS_IN_SINGLEPART = 160;
+	private static final String INT_NUMBER_FORMAT = "91";
 
 	/**
 	 * Assembles the a list of SMS parts (each containing max. 160 characters of
@@ -98,12 +99,48 @@ public class SmsService {
 		return null;
 	}
 
-	// TODO For Christian ;)
+	/**
+	 * Converts the specified international telephone number to a 7-Bit format.
+	 * The format consists of the Address length in Hex, the Type-of-Address
+	 * (91) and the 7-Bit representation of the actual telephone number
+	 * 
+	 * @param number
+	 *            An international telephone number (including preceding +)
+	 * @return byte[] representation of the converted telephone number
+	 */
 	static byte[] encodeInternationalNumberInSemiOctets(String number) {
-		// TODO stub method
+		char[] number7BitRaw;
+		String numberLengthHex;
 
-		// Klaus' number: +436646311689
-		return NumberConverter.hexStringToBytes("0C91346664136198");
+		// Exclude + from number
+		if (number.substring(0, 1).equals("+")) {
+			number = number.substring(1);
+		}
+
+		// Get length of number in Hex
+		numberLengthHex = Integer.toHexString(number.length()).toUpperCase();
+
+		// Add an 0, if number length < 16
+		if (number.length() < 16)
+			numberLengthHex = "0" + numberLengthHex;
+
+		// Add F, if length of number is odd
+		if (number.length() % 2 != 0) {
+			number += 'F';
+		}
+
+		// Calculate 7-Bit number
+		number7BitRaw = new char[number.length()];
+
+		for (int i = 0; i < number.length(); ++i) {
+			if (i % 2 == 0) {
+				number7BitRaw[i] = number.charAt(i + 1);
+			} else {
+				number7BitRaw[i] = number.charAt(i - 1);
+			}
+		}
+
+		return NumberConverter.hexStringToBytes(numberLengthHex
+				+ INT_NUMBER_FORMAT + new String(number7BitRaw));
 	}
-
 }
