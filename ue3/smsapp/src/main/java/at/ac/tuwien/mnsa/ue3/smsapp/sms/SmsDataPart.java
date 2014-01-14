@@ -38,6 +38,8 @@ public class SmsDataPart {
 
 	private final boolean hasUdh;
 
+	private byte[] finalPdu;
+
 	/**
 	 * Constructor with UDH
 	 */
@@ -48,13 +50,16 @@ public class SmsDataPart {
 			byte[] csmsReferenceNumber, byte noOfParts, byte partNo,
 			byte[] encodedMsg) {
 
-		if (parentSms == null)
-			throw new IllegalArgumentException("parentSms is null");
+		checkCommonParameters(parentSms, smscInfo, pduHeader, messageReference,
+				encodedDestinationAddress, protocolIdentifier,
+				dataCodingScheme, validityPeriod, userDataLength, encodedMsg);
+
+		// Check UDH specific parameters
 		if (csmsReferenceNumber == null || csmsReferenceNumber.length != 2)
 			throw new IllegalArgumentException(
 					"The CSMS reference number in the UDH has to consist of exactly two bytes.");
-		// TODO check all the parameters for null, valid length, valid values,
-		// ...
+
+		// TODO check the remaining UDH parameters for null, valid length, etc.
 
 		// PDU header
 		this.parentSms = parentSms;
@@ -87,10 +92,10 @@ public class SmsDataPart {
 			byte messageReference, byte[] encodedDestinationAddress,
 			byte protocolIdentifier, byte dataCodingScheme,
 			byte validityPeriod, byte userDataLength, byte[] encodedMsg) {
-		if (parentSms == null)
-			throw new IllegalArgumentException("parentSms is null");
-		// TODO check all the parameters for null, valid length, valid values,
-		// ...
+
+		checkCommonParameters(parentSms, smscInfo, pduHeader, messageReference,
+				encodedDestinationAddress, protocolIdentifier,
+				dataCodingScheme, validityPeriod, userDataLength, encodedMsg);
 
 		// PDU header
 		this.parentSms = parentSms;
@@ -116,33 +121,48 @@ public class SmsDataPart {
 		this.encodedMsg = encodedMsg;
 	}
 
+	private void checkCommonParameters(Sms parentSms, byte[] smscInfo,
+			byte pduHeader, byte messageReference,
+			byte[] encodedDestinationAddress, byte protocolIdentifier,
+			byte dataCodingScheme, byte validityPeriod, byte userDataLength,
+			byte[] encodedMsg) throws IllegalArgumentException {
+		if (parentSms == null)
+			throw new IllegalArgumentException("parentSms is null");
+		if (smscInfo == null || smscInfo.length < 1)
+			throw new IllegalArgumentException(
+					"The SMSC info byte array must at least contain one byte (0x00) for a zero byte SMSC info");
+		// TODO check all the parameters for null, valid length, etc.
+	}
+
 	public Sms getParentSms() {
 		return parentSms;
 	}
 
 	public int getMsgByteLengthWithoutSmscPart() {
-		// TODO stub
-		return 21;
+		return getPdu().length - smscInfo.length;
 	}
 
 	public byte[] getPdu() {
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		try {
-			outputStream.write(smscInfo);
-			outputStream.write(pduHeader);
-			outputStream.write(messageReference);
-			outputStream.write(encodedDestinationAddress);
-			outputStream.write(protocolIdentifier);
-			outputStream.write(dataCodingScheme);
-			outputStream.write(validityPeriod);
-			outputStream.write(userDataLength);
-			if (hasUdh)
-				outputStream.write(getUdh());
-			outputStream.write(encodedMsg);
-		} catch (IOException ignored) {
+		if (finalPdu == null) {
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			try {
+				outputStream.write(smscInfo);
+				outputStream.write(pduHeader);
+				outputStream.write(messageReference);
+				outputStream.write(encodedDestinationAddress);
+				outputStream.write(protocolIdentifier);
+				outputStream.write(dataCodingScheme);
+				outputStream.write(validityPeriod);
+				outputStream.write(userDataLength);
+				if (hasUdh)
+					outputStream.write(getUdh());
+				outputStream.write(encodedMsg);
+			} catch (IOException ignored) {
+			}
+			finalPdu = outputStream.toByteArray();
 		}
 
-		return outputStream.toByteArray();
+		return finalPdu;
 	}
 
 	public byte[] getUdh() {
