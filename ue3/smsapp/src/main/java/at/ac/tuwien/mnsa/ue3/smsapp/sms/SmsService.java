@@ -67,6 +67,8 @@ public class SmsService {
 
 		// TODO generate the reference number with a random generator
 		byte csmsReferenceNumber = (byte) 0x00;
+		// Sets the UDHI bit in the PDU header
+		byte pduHearder = NumberConverter.setBit(6, DEFAULT_PDU_HEADER);
 
 		for (int i = 0; i < numParts; i++) {
 			String msgPart = msg.substring(i * MAXIMUM_CHARS_IN_MULTIPART, Math
@@ -78,7 +80,7 @@ public class SmsService {
 			// Generate the PDU for each part for sending as a concatenated SMS
 			// with the PDUs containing a UDH for reassembling
 			SmsDataPart sdp = new SmsDataPart(sms, new byte[] { DEFAULT_SMSC },
-					DEFAULT_PDU_HEADER, DEFAULT_MESSAGE_REFERENCE,
+					pduHearder, DEFAULT_MESSAGE_REFERENCE,
 					encodeInternationalNumberInSemiOctets(sms.getRecipient()),
 					DEFAULT_PROTOCOL_IDENTIFIER, DEFAULT_DATA_CODING_SCHEME,
 					DEFAULT_VALIDITY_PERIOD, userDataLength,
