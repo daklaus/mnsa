@@ -42,6 +42,12 @@ public class SmsServiceTest {
 	}
 
 	@Test
+	public void testConvertWith7BitAlphabet() {
+		// TODO method stub
+		// fail("Not yet implemented");
+	}
+
+	@Test
 	public void testEncodeInternationalNumberInSemiOctets() {
 		// TODO method stub
 		// fail("Not yet implemented");
