@@ -39,6 +39,8 @@ public class SmsServiceTest {
 
 	@Test
 	public void testEncodeMsgInSeptets() {
+		assertArrayEquals("E", NumberConverter.hexStringToBytes("45"),
+				SmsService.encodeMsgInSeptets("E"));
 		assertArrayEquals("ABC", NumberConverter.hexStringToBytes("41E110"),
 				SmsService.encodeMsgInSeptets("ABC"));
 		assertArrayEquals("XD", NumberConverter.hexStringToBytes("5822"),
@@ -58,8 +60,29 @@ public class SmsServiceTest {
 
 	@Test
 	public void testConvertWith7BitAlphabet() {
-		// TODO method stub
-		// fail("Not yet implemented");
+		assertArrayEquals("ABC", NumberConverter.hexStringToBytes("414243"),
+				SmsService.convertWith7BitAlphabet("ABC"));
+		assertArrayEquals(";-)", NumberConverter.hexStringToBytes("3b2d29"),
+				SmsService.convertWith7BitAlphabet(";-)"));
+		assertArrayEquals("A\nB", NumberConverter.hexStringToBytes("410a42"),
+				SmsService.convertWith7BitAlphabet("A\nB"));
+		// Test with CR LF SP ESC
+		assertArrayEquals("\r\n \u001b",
+				NumberConverter.hexStringToBytes("0d0a1b"),
+				SmsService.convertWith7BitAlphabet("\r\n\u001b"));
+
+		// With extensions
+		assertArrayEquals(
+				";-| {test} x[]",
+				NumberConverter
+						.hexStringToBytes("3b2d1b40201b28746573741b2920781b3c1b3e"),
+				SmsService.convertWith7BitAlphabet(";-| {test} x[]"));
+		// All extensions
+		assertArrayEquals(
+				"\u000c^{}\\[~]|€",
+				NumberConverter
+						.hexStringToBytes("1b0a1b141b281b291b2f1b3c1b3d1b3e1b401b65"),
+				SmsService.convertWith7BitAlphabet("\u000c^{}\\[~]|€"));
 	}
 
 	@Test
@@ -74,5 +97,10 @@ public class SmsServiceTest {
 		assertArrayEquals(NumberConverter.hexStringToBytes("0B913466348080F2"),
 				SmsService
 						.encodeInternationalNumberInSemiOctets("+43664308082"));
+		
+		// Telephone number: +436646311689
+		assertArrayEquals(NumberConverter.hexStringToBytes("0C91346664136198"),
+				SmsService
+						.encodeInternationalNumberInSemiOctets("+436646311689"));
 	}
 }
