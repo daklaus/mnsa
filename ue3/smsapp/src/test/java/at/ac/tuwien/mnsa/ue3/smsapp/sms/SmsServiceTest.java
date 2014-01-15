@@ -67,8 +67,10 @@ public class SmsServiceTest {
 	public void testConvertWith7BitAlphabet() {
 		assertArrayEquals("ABC", NumberConverter.hexStringToBytes("414243"),
 				SmsService.convertWith7BitAlphabet("ABC"));
+
 		assertArrayEquals(";-)", NumberConverter.hexStringToBytes("3b2d29"),
 				SmsService.convertWith7BitAlphabet(";-)"));
+
 		assertArrayEquals("A\nB", NumberConverter.hexStringToBytes("410a42"),
 				SmsService.convertWith7BitAlphabet("A\nB"));
 
