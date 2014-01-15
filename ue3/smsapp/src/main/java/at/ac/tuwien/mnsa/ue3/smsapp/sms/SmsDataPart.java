@@ -9,10 +9,11 @@ public class SmsDataPart {
 	 * Concatenated short message w/ 16-bit reference number
 	 */
 	private static final byte INFORMATION_ELEMENT_IDENTIFIER_16BIT_CSMS = (byte) 0x08;
-	/**
-	 * Concatenated short message w/ 8-bit reference number
-	 */
-	private static final byte INFORMATION_ELEMENT_IDENTIFIER_8BIT_CSMS = (byte) 0x00;
+	// /**
+	// * Concatenated short message w/ 8-bit reference number
+	// */
+	// private static final byte INFORMATION_ELEMENT_IDENTIFIER_8BIT_CSMS =
+	// (byte) 0x00;
 
 	// PDU header
 	private final Sms parentSms;
@@ -131,6 +132,10 @@ public class SmsDataPart {
 		if (smscInfo == null || smscInfo.length < 1)
 			throw new IllegalArgumentException(
 					"The SMSC info byte array must at least contain one byte (0x00) for a zero byte SMSC info");
+		if (encodedDestinationAddress == null
+				|| encodedDestinationAddress.length <= 0)
+			throw new IllegalArgumentException(
+					"The encoded destination address must at least contain one byte");
 		// TODO check all the parameters for null, valid length, etc.
 	}
 
@@ -152,7 +157,8 @@ public class SmsDataPart {
 				outputStream.write(encodedDestinationAddress);
 				outputStream.write(protocolIdentifier);
 				outputStream.write(dataCodingScheme);
-				outputStream.write(validityPeriod);
+				if ((pduHeader & 0x18) != 0)
+					outputStream.write(validityPeriod);
 				outputStream.write(userDataLength);
 				if (hasUdh)
 					outputStream.write(getUdh());

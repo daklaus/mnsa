@@ -33,7 +33,7 @@ public class SmsServiceTest {
 
 	// @Test
 	// public void testGetSmsDataParts() {
-	// TODO method stub
+	// TODO test the getSmsDataParts method
 	// fail("Not yet implemented");
 	// }
 

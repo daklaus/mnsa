@@ -2,6 +2,7 @@ package at.ac.tuwien.mnsa.ue3.smsapp.csv;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +39,7 @@ public class SmsCsvService implements CsvService {
 	@Override
 	public List<Sms> getSMSList() throws IOException {
 		if (smsList == null) {
-			smsList = loadSMS();
+			smsList = loadSms();
 		}
 
 		return smsList;
@@ -46,30 +47,58 @@ public class SmsCsvService implements CsvService {
 
 	/**
 	 * Loads content from globally CSV-File (specified in SmsPropertiesService)
-	 * and creates a List of Sms out of it
+	 * and creates a List of Sms out of it.
 	 * 
 	 * @return A List containing Sms Elements
 	 * @throws IOException
 	 */
-	private List<Sms> loadSMS() throws IOException {
+	private List<Sms> loadSms() throws IOException {
 
 		String csvFile = PropertiesServiceFactory.getPropertiesService()
 				.getProperties().getProperty(SmsPropertiesService.CSV_KEY);
 
-		String[] line;
-		CSVReader reader = null;
-
+		Reader reader = null;
+		List<Sms> smsList;
 		try {
 			try {
-				reader = new CSVReader(new InputStreamReader(
-						ClassLoader.getSystemResourceAsStream(csvFile)),
-						SEPERATOR);
+				reader = new InputStreamReader(
+						ClassLoader.getSystemResourceAsStream(csvFile));
 
-				smsList = new ArrayList<Sms>();
+				smsList = loadSms(reader, csvFile);
+			} finally {
+				if (reader != null) {
+					reader.close();
+				}
+			}
+		} catch (Exception e) {
+			throw new IOException("Couldn't load " + csvFile + "!", e);
+		}
+
+		return smsList;
+	}
+
+	/**
+	 * Loads content from a CSV file specified in a stream and creates a List of
+	 * SMS out of it.
+	 * 
+	 * @param reader
+	 *            a Reader containing a stream of a CSV file
+	 * @param csvFileName
+	 *            the name of the file which will be parsed
+	 * @return A List containing Sms Elements
+	 * @throws IOException
+	 */
+	List<Sms> loadSms(Reader reader, String csvFileName) throws IOException {
+		String[] line;
+
+		CSVReader csvReader = null;
+		List<Sms> smsList = new ArrayList<Sms>();
+		try {
+			try {
+				csvReader = new CSVReader(reader, SEPERATOR);
 
 				// Read contents per line...
-				for (int i = 0; (line = reader.readNext()) != null; i++) {
-					// while ((line = reader.readNext()) != null) {
+				for (int i = 0; (line = csvReader.readNext()) != null; i++) {
 
 					if (line.length != 2) {
 						log.error(
@@ -85,21 +114,20 @@ public class SmsCsvService implements CsvService {
 
 					} catch (IllegalArgumentException e) {
 						log.error("Error while parsing line {} of {}: {}",
-								i + 1, csvFile, e.getMessage());
+								i + 1, csvFileName, e.getMessage());
 					}
 
 				}
 
 			} finally {
-				if (reader != null) {
-					reader.close();
+				if (csvReader != null) {
+					csvReader.close();
 				}
 			}
 		} catch (Exception e) {
-			throw new IOException("Couldn't load " + csvFile + "!", e);
+			throw new IOException("Couldn't load " + csvFileName + "!", e);
 		}
 
 		return smsList;
 	}
-
 }
