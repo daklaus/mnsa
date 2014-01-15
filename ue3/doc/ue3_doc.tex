@@ -122,50 +122,59 @@
 \newpage
 
 \section{Kurzfassung}
-Erstellung eines JavaCard Applets (für den Emulator), mit dem einfache Berechnungen durchgeführt werden können.
+Es soll über eine Java Anwendung das Telefon mit AT-Commandos so angesteuert werden, dass SMS versendet werden können.
 
 \section{Einleitung}
-Ziel dieser Übung war es, einen Taschenrechner als JavaCard Applet, aufbauend auf dem SDK für JavaCard, zu implementieren. Im, durch das JavaCard SDK bereitgestellten, Emulator soll die Anwendung anfänglich getestet werden. Anschließend sollen jedoch Unit-Tests entwickelt werden, um die Funktionalität der Anwendung sicherzustellen.
+Ziel dieser Übung war es, das Modem  des Mobiletelefons über die serielle USB-Schnittstelle mit AT-Commandos zu versorgen. Durch AT-Commandos ist es möglich, Modems zu steueren und zu parametrieren. So werden AT-Commandos unter anderem zum Absetzen von Telefongesprächen oder verschicken von SMS verwendet. Der Versand von SMS unterscheidet sich grundsätzlich durch zwei Modi: Text- und PDU-Modus. Für das Erfüllen des Übungsziels musste der PDU-Modus implementiert werden, auf welchen sich die nachfolgende Ausarbeitung beschränkt. Die benötigten Nachrichten, Telefonnummern und Kommunikationseinstellungen sollen aus einer CSV- und Properties-Datei ausgelesen werden.
 
 \section{Problemstellung / Zielsetzung}
 Generell wurde diese Übung wie folgt fertiggestellt:
 \begin{enumerate}
-\item Studium einschlägiger Literatur (von LVA Leitung bereitgestellt)
-\item Erstellen der Klassen "`JCardCalc"' und "`JCardCalcTest"'
-\item Implementierung des Protokolls und der gewünschten Funktionen des Taschenrechners (Addition, Subtraktion, Multiplikation, Logisches AND/OR/NOT)
-\item Erstellung der Test-Fälle in Form von Unit-Tests
+	\item Studium einschlägiger Literatur (von LVA Leitung bereitgestellt)
+	\item Erstellen der Klassen "`Sms"', "`SmsApp"' "`SmsDataPart"' und "`SmsService"'. Des Weiteren haben wir noch jeweils ein Package für das Auslesen von Properties- und CSV-Dateien erstellt. Da wir in diesem Projekt einige Routinen aus der ersten Übung wiederverwenden konnten, haben wir außerdem noch eine Utility-Klasse namens "`NumberConverter"' implementiert.
+	\item Folgende Probleme galt es zu lösen:
+		\begin{enumerate}
+			\item Absetzen von AT-Commandos über die serielle USB-Schnittstele.
+			\item Konvertierung von Textzeichen in das 3GPP TS 23.038 / GSM 03.38 7-Bit Standard-Alphabet (Basic Character Set) mit Erweiterungen (Basic Character Set Extension).
+			\item Bitweises Konvertieren der zu sendenden Daten und Informationen in das PDU Format.
+		\end{enumerate}
 \end{enumerate}
 
 \section{Technischer Aufbau}
-Generell haben wir das Projekt mit Hilfe von Maven erstellt. Wie bereits erwähnt, besteht diese Lösung aus zwei Klassen, welche folgend näher vorgestellt werden.
+Generell haben wir das Projekt mit Hilfe von Maven erstellt. Wie bereits erwähnt, besteht diese Lösung aus vier Haupklassen, welche nachfolgend näher vorgestellt werden.
 
-\subsection{"'JCardCalc"'-Klasse}
-In dieser Klasse befindet sich die Logik des JavaCard Applets. Sie empfängt APDUs und verarbeitet sie. Je nach INS Feld der APDU (siehe Protokolldefinition der LVA Leitung) führt das Applet eine bestimmte mathematische Operation durch. Nach erfolgreicher Berechnung sendet das Applet ein Response, welches das Ergebnis der Berechnung beinhält, zurück.
+\subsection{"'Sms"'-Klasse}
+Model-Klasse zur Speicherung der benötigten SMS-Daten in Plain-Text (Nachrichteninhalt und Telefonnummer)
 
-Für die Implementierung der Logik wurden im Speziellen folgende Klassen verwendet:
-\begin{lstlisting}
-import javacard.framework.APDU;
-import javacard.framework.ISO7816;
-import javacard.framework.Applet;
-import javacard.framework.ISOException;
-\end{lstlisting}
+\subsection{"'SmsApp"'-Klasse}
+Hierin befindet sich die Main-Methode zum Ausführen der gewünschten Funktionalität und Routinen für das Initialisieren des Telefon-Modems (ATZ, PIN, SMSC, ...).
 
-\subsection{"'JCardCalcTest"'-Klasse}
-Diese Klasse enthält die Unit-Tests für die effiziente Überprüfung der Logik des Applets. Hierbei haben wir im Speziellen auf folgende Bibliothek zugegriffen (Maven dependency):
-\begin{lstlisting}
-import com.licel.jcardsim.base.Simulator;
-\end{lstlisting}
-Diese Bibliothek ermöglicht das schnelle und effiziente Testen der Logik aus "`JCardCalc"', indem sie die Funktion des "`Emulators"' übernimmt.
+\subsection{"'SmsDataPart"'-Klasse}
+Model-Klasse für die Speicherung von Nachrichten im PDU-Format
 
-Die wesentliche Aufgabe dieser Testklasse liegt jedoch im Senden von APDU-Commands an das Applet. Hierfür ist es sehr wichtig, die Umwandlung von Zahlen zwischen gewissen Zahlensystemen (HEX, DEZ, Binär) zu studieren, da für die Übertragung Bytes eingesetzt werden. Hilfreich ist die Verwendung von Zahlen-Convertern (bspw. die "`Programmierer"'-Ansicht des Standard-Taschenrechners von Windows 7).
+\subsection{"'SmsService"'-Klasse}
+Diese Klasse beherbergt Routinen für die 7-Bit Konvertierung von Nachrichteninhalten und Telefonnummern, die richtige Formatierung von (Multipart)-SMS sowie die Konvertierung in das PDU Format.
+
+\subsection{Bibliotheken}
+
+\subsubsection{OpenCSV}
+Wurde für das korrekte Auslesen der sendsms.csv Datei verwendet.
+
+\subsubsection{nrjavaserial}
+Diese Bibliothek stellt Routinen für die serielle Kommunikation mit dem Modem des Mobiltelefons zur Verfügung (wurde bereits in der ersten Übung verwendet).
+
+\subsubsection{guava}
+Die "`Google Utilities"'-Bibliothek wurde für die Verwendung der "`BiMap"' und deren Implementierung "`ImmutableBiMap"' eingesetzt, welche wir für die Abbildung des 7-Bit Alphabets herangezogen haben.
+
+\section{Programmablauf}
+Durch Start der main-Methode wird das Telefon-Modem initialisiert, die gespeicherten Nachrichten und Telefonnumern ausgelesen und der Aufbau der SMS gestartet. Für den SMS-Versand werden Telefonnummern und Nachrichteninhalte in das 7-Bit Format konvertiert und anschließend nach den PDU-Spezifikationen bitweise umgewandelt. Wurden diese Vorgänge durchgeführt, werden die SMS unter Verwendung von AT-Commands erfolgreich über das Telefon-Modem versandt.
 
 \section{Resultat}
-Unsere Gruppe konnte alle Anforderungen erfolgreich implementieren (siehe Unit-Tests).
+Unsere Gruppe konnte alle Anforderungen erfolgreich implementieren (siehe Unit-Tests und main-Methode).
 
 \section{Installation}
-Das Projekt wird über Maven verwaltet. Es ist keine weitere Konfiguration nötig. Der Befehl "`mvn test"' erstellt das Projekt und führt die Unit-Tests aus.
+Das Projekt wird über Maven verwaltet. Es ist keine weitere Konfiguration nötig. Der Befehl "`mvn test"' erstellt das Projekt und führt die Unit-Tests aus. Um die main-Methode zu testen, muss das Telefon mit dem Computer verbunden und die Datei "`sendsms.properties"' an die jeweilige Umgebung angepasst sein (COM-Port des Telefonmodems).
 
 \section{Erkenntnisse}
-Im Vergleich zu Übung 1 war dieses Projekt wesentlich leichter und schneller zu lösen. Dies liegt vor allem an der Tatsache, dass für das Testen des Programms ein Emulator verwendet werden konnte und nicht auf das Mobiltelefon deployed werden musste.
-Unserer Meinung nach lag die einzige "`Schwierigkeit"' in der Umwandlung der Zahlensysteme.
+Aufgrund der Tatsache, dass wir recht früh damit begonnen haben, uns mit, diese Übung betreffender, Materie auseinanderzusetzen, konnten wir das Projekt recht zügig fertigstellen. Die eigentliche Schwierigkeit dieser Übung lag (wieder) am Konvertieren von Bits/Bytes. Der Sendevorgang von (Multipart-)SMS über AT-Commandos konnte schnell umgesetzt werden. Insgesamt kann gesagt werden, dass dies die spaßigste Übung war. :) Einziges Manko: Die Belastung des "`Geldbörserls"' aufgrund des SMS Versands ;)
 \end{document}
