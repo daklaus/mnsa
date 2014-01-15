@@ -71,6 +71,7 @@ public class SmsServiceTest {
 				SmsService.convertWith7BitAlphabet(";-)"));
 		assertArrayEquals("A\nB", NumberConverter.hexStringToBytes("410a42"),
 				SmsService.convertWith7BitAlphabet("A\nB"));
+
 		// Test with CR LF SP ESC
 		assertArrayEquals("\r\n \u001b",
 				NumberConverter.hexStringToBytes("0d0a1b"),
@@ -82,6 +83,15 @@ public class SmsServiceTest {
 				NumberConverter
 						.hexStringToBytes("3b2d1b40201b28746573741b2920781b3c1b3e"),
 				SmsService.convertWith7BitAlphabet(";-| {test} x[]"));
+
+		// All Basic characters
+		assertArrayEquals(
+				"@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞ\u001BÆæßÉ !\"#¤%&'()*+,-./0123456789:;<=>?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ§¿abcdefghijklmnopqrstuvwxyzäöñüà",
+				NumberConverter
+						.hexStringToBytes("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f"),
+				SmsService
+						.convertWith7BitAlphabet("@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞ\u001BÆæßÉ !\"#¤%&'()*+,-./0123456789:;<=>?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ§¿abcdefghijklmnopqrstuvwxyzäöñüà"));
+
 		// All extensions
 		assertArrayEquals(
 				"\u000c^{}\\[~]|€",
