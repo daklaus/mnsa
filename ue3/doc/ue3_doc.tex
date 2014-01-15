@@ -173,7 +173,7 @@ Durch Start der main-Methode wird das Telefon-Modem initialisiert, die gespeiche
 Unsere Gruppe konnte alle Anforderungen erfolgreich implementieren (siehe Unit-Tests und main-Methode).
 
 \section{Installation}
-Das Projekt wird über Maven verwaltet. Es ist keine weitere Konfiguration nötig. Der Befehl "`mvn test"' erstellt das Projekt und führt die Unit-Tests aus. Um die main-Methode zu testen, muss das Telefon mit dem Computer verbunden und die Datei "`sendsms.properties"' an die jeweilige Umgebung angepasst sein (COM-Port des Telefonmodems).
+Das Projekt wird über Maven verwaltet. Es ist keine weitere Konfiguration nötig. Der Befehl "`mvn test"' erstellt das Projekt und führt die Unit-Tests aus. Um die main-Methode zu testen, muss das Telefon mit dem Computer verbunden und die Datei "`sendsms.properties"' an die jeweilige Umgebung angepasst sein (COM-Port des Telefonmodems). Weiters muss die CSV-Datei, welche in der "`sendsms.properties"' spezifiziert wurde, mit den Nummern und Texten der SMS' gefüllt werden.
 
 \section{Erkenntnisse}
 Aufgrund der Tatsache, dass wir recht früh damit begonnen haben, uns mit, diese Übung betreffender, Materie auseinanderzusetzen, konnten wir das Projekt recht zügig fertigstellen. Die eigentliche Schwierigkeit dieser Übung lag (wieder) am Konvertieren von Bits/Bytes. Der Sendevorgang von (Multipart-)SMS über AT-Commandos konnte schnell umgesetzt werden. Insgesamt kann gesagt werden, dass dies die spaßigste Übung war. :) Einziges Manko: Die Belastung des "`Geldbörserls"' aufgrund des SMS Versands ;)
