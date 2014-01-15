@@ -4,40 +4,39 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
+import java.util.Random;
+
+import at.ac.tuwien.common.binary.NumberConverter;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.primitives.Bytes;
 
-import at.ac.tuwien.common.binary.NumberConverter;
-
 public class SmsService {
 
 	// PDU constants
 	private static final byte[] DEFAULT_SMSC = new byte[] { (byte) 0x00 };
-	private static final byte DEFAULT_PDU_HEADER = (byte) 0x11; // MTI set to
-																// SMS-SUBMIT
-																// and VPF set
-																// to relative
-																// format
-	private static final byte DEFAULT_MESSAGE_REFERENCE = (byte) 0x00;
+	/**
+	 * MTI set to SMS-SUBMIT and VPF set to relative format
+	 */
+	private static final byte DEFAULT_PDU_HEADER = (byte) 0x11;
 	private static final byte DEFAULT_PROTOCOL_IDENTIFIER = (byte) 0x00;
 	private static final byte DEFAULT_DATA_CODING_SCHEME = (byte) 0x00;
 	private static final byte DEFAULT_VALIDITY_PERIOD = (byte) 0xA7;
 
-	private static final int MAXIMUM_SEPTETS_IN_SINGLEPART = 160;
-	private static final int UDH_LENGHT_IN_BYTES = 7;
-	private static final int UDH_LENGHT_IN_SEPTETS = (int) Math
+	public static final int MAXIMUM_SEPTETS_IN_SINGLEPART = 160;
+	// Attention: If you change the below constant to one byte don't forget to
+	// pad the encoded message by one bit for the alignment to septets!
+	public static final int CSMS_REFERENCE_NUMBER_BYTES = 2;
+	public static final int UDH_LENGHT_IN_BYTES = CSMS_REFERENCE_NUMBER_BYTES + 5;
+	public static final int UDH_LENGHT_IN_SEPTETS = (int) Math
 			.ceil((double) UDH_LENGHT_IN_BYTES / 7 * 8);
-	// private static final int MAXIMUM_BYTES_IN_SINGLEPART =
-	// MAXIMUM_SEPTETS_IN_SINGLEPART / 8 * 7;
-	private static final int MAXIMUM_SEPTETS_IN_MULTIPART = MAXIMUM_SEPTETS_IN_SINGLEPART
+	public static final int MAXIMUM_SEPTETS_IN_MULTIPART = MAXIMUM_SEPTETS_IN_SINGLEPART
 			- UDH_LENGHT_IN_SEPTETS;
 
-	private static final String INT_NUMBER_FORMAT = "91";
+	private static final String INT_NUMBER_FORMAT_PREFIX = "91";
 
 	private static final BiMap<Character, Byte> GSM0338_ALPHABET;
-
 	private static final BiMap<Character, Byte> GSM0338_ALPHABET_EXTENSION;
 
 	static {
@@ -208,8 +207,12 @@ public class SmsService {
 		byte[] smscInfo = DEFAULT_SMSC;
 		byte[] encodedRecipient = encodeInternationalNumberInSemiOctets(sms
 				.getRecipient());
-		// TODO Generate the reference number with a random generator
-		byte messageReference = DEFAULT_MESSAGE_REFERENCE;
+		// Generate the reference number with a random generator
+		// Weak random generator is sufficient for this purpose
+		Random rnd = new Random();
+		byte[] rndBytes = new byte[1];
+		rnd.nextBytes(rndBytes);
+		byte messageReference = rndBytes[0];
 		byte pduHearder = DEFAULT_PDU_HEADER;
 		byte protocolIdentifier = DEFAULT_PROTOCOL_IDENTIFIER;
 		byte dataCodingScheme = DEFAULT_DATA_CODING_SCHEME;
@@ -230,8 +233,10 @@ public class SmsService {
 		// Split the message into parts
 		int numParts = msg.length / MAXIMUM_SEPTETS_IN_MULTIPART + 1;
 
-		// TODO Generate the reference number with a random generator
-		byte[] csmsReferenceNumber = new byte[] { (byte) 0x00, (byte) 0x00 };
+		// Generate the CSMS reference number with a random generator
+		// Weak random generator is sufficient for this purpose
+		byte[] csmsReferenceNumber = new byte[CSMS_REFERENCE_NUMBER_BYTES];
+		rnd.nextBytes(csmsReferenceNumber);
 		// Sets the UDHI bit in the PDU header
 		pduHearder = NumberConverter.setBit(6, pduHearder);
 
@@ -317,9 +322,9 @@ public class SmsService {
 	 * @return byte[] representation of the converted String
 	 */
 	static byte[] convertWith7BitAlphabet(String msg) {
-		if(msg == null)
+		if (msg == null)
 			throw new IllegalArgumentException("The message is null");
-		
+
 		char tempChar;
 		List<Byte> msgByteList;
 
@@ -366,7 +371,7 @@ public class SmsService {
 			throw new IllegalArgumentException(
 					"The number is not in international format (e.g. +436641234567)");
 
-		char[] number7BitRaw;
+		char[] numberInSwappedSemiOctets;
 		String numberLengthHex;
 
 		// Exclude + from number
@@ -386,18 +391,19 @@ public class SmsService {
 			number += 'F';
 		}
 
-		// Calculate 7-Bit number
-		number7BitRaw = new char[number.length()];
+		// Calculate number as swapped semi-octets (nibbles)
+		numberInSwappedSemiOctets = new char[number.length()];
 
 		for (int i = 0; i < number.length(); i++) {
 			if (i % 2 == 0) {
-				number7BitRaw[i] = number.charAt(i + 1);
+				numberInSwappedSemiOctets[i] = number.charAt(i + 1);
 			} else {
-				number7BitRaw[i] = number.charAt(i - 1);
+				numberInSwappedSemiOctets[i] = number.charAt(i - 1);
 			}
 		}
 
 		return NumberConverter.hexStringToBytes(numberLengthHex
-				+ INT_NUMBER_FORMAT + new String(number7BitRaw));
+				+ INT_NUMBER_FORMAT_PREFIX
+				+ new String(numberInSwappedSemiOctets));
 	}
 }

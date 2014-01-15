@@ -392,11 +392,6 @@ public class SmsApp {
 				.getProperty(SmsPropertiesService.PORT_KEY);
 	}
 
-	private static String getCsvFileName() throws IOException {
-		return PropertiesServiceFactory.getPropertiesService().getProperties()
-				.getProperty(SmsPropertiesService.CSV_KEY);
-	}
-
 	private static String getSmsc() throws IOException {
 		return PropertiesServiceFactory.getPropertiesService().getProperties()
 				.getProperty(SmsPropertiesService.SMSC_KEY);

@@ -16,6 +16,10 @@ import au.com.bytecode.opencsv.CSVReader;
 
 public class SmsCsvService implements CsvService {
 
+	private static final boolean STRICT_QUOTES = false;
+
+	private static final char QUOTE_CHAR = '\"';
+
 	private static final char SEPERATOR = ',';
 
 	private static final Logger log = LoggerFactory
@@ -88,14 +92,16 @@ public class SmsCsvService implements CsvService {
 	 * @return A List containing Sms Elements
 	 * @throws IOException
 	 */
-	List<Sms> loadSms(Reader reader, String csvFileName) throws IOException {
+	static List<Sms> loadSms(Reader reader, String csvFileName)
+			throws IOException {
 		String[] line;
 
 		CSVReader csvReader = null;
 		List<Sms> smsList = new ArrayList<Sms>();
 		try {
 			try {
-				csvReader = new CSVReader(reader, SEPERATOR);
+				csvReader = new CSVReader(reader, SEPERATOR, QUOTE_CHAR,
+						STRICT_QUOTES);
 
 				// Read contents per line...
 				for (int i = 0; (line = csvReader.readNext()) != null; i++) {
@@ -109,7 +115,6 @@ public class SmsCsvService implements CsvService {
 
 					try {
 						// Create a Sms and save it into the smsList
-						log.debug("Sms going to be saved.");
 						smsList.add(new Sms(line[0], line[1]));
 
 					} catch (IllegalArgumentException e) {

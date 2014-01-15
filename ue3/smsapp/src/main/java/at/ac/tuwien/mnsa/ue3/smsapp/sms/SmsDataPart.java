@@ -6,14 +6,13 @@ import java.io.IOException;
 public class SmsDataPart {
 	// UDH constants
 	/**
+	 * Concatenated short message w/ 8-bit reference number
+	 */
+	private static final byte INFORMATION_ELEMENT_IDENTIFIER_8BIT_CSMS = (byte) 0x00;
+	/**
 	 * Concatenated short message w/ 16-bit reference number
 	 */
 	private static final byte INFORMATION_ELEMENT_IDENTIFIER_16BIT_CSMS = (byte) 0x08;
-	// /**
-	// * Concatenated short message w/ 8-bit reference number
-	// */
-	// private static final byte INFORMATION_ELEMENT_IDENTIFIER_8BIT_CSMS =
-	// (byte) 0x00;
 
 	// PDU header
 	private final Sms parentSms;
@@ -37,8 +36,6 @@ public class SmsDataPart {
 	// User data
 	private final byte[] encodedMsg;
 
-	private final boolean hasUdh;
-
 	private byte[] finalPdu;
 
 	/**
@@ -51,16 +48,19 @@ public class SmsDataPart {
 			byte[] csmsReferenceNumber, byte noOfParts, byte partNo,
 			byte[] encodedMsg) {
 
-		checkCommonParameters(parentSms, smscInfo, pduHeader, messageReference,
-				encodedDestinationAddress, protocolIdentifier,
-				dataCodingScheme, validityPeriod, userDataLength, encodedMsg);
-
-		// Check UDH specific parameters
-		if (csmsReferenceNumber == null || csmsReferenceNumber.length != 2)
+		// Checks for PDU header data
+		if (parentSms == null)
+			throw new IllegalArgumentException("parentSms is null");
+		if (smscInfo == null || smscInfo.length < 1)
 			throw new IllegalArgumentException(
-					"The CSMS reference number in the UDH has to consist of exactly two bytes.");
-
-		// TODO check the remaining UDH parameters for null, valid length, etc.
+					"The SMSC info byte array must at least contain one byte (0x00) for a zero byte SMSC info");
+		if ((pduHeader & 0x03) != 1)
+			throw new IllegalArgumentException(
+					"The PDU header is not set to SMS-SUBMIT type");
+		if (encodedDestinationAddress == null
+				|| encodedDestinationAddress.length <= 0)
+			throw new IllegalArgumentException(
+					"The encoded destination address must at least contain one byte");
 
 		// PDU header
 		this.parentSms = parentSms;
@@ -73,10 +73,22 @@ public class SmsDataPart {
 		this.validityPeriod = validityPeriod;
 		this.userDataLength = userDataLength;
 
+		// Check UDH specific parameters
+		if (csmsReferenceNumber == null || csmsReferenceNumber.length < 1
+				|| csmsReferenceNumber.length > 2)
+			throw new IllegalArgumentException(
+					"The CSMS reference number in the UDH has to consist of at least one and maximal two bytes.");
+		if (noOfParts == 0 || partNo == 0)
+			throw new IllegalArgumentException(
+					"The \"number of parts\" field or the \"part number\" field in the UDH must not be zero!");
+
 		// UDH
-		this.hasUdh = true;
 		this.userDataHeaderLength = (byte) (csmsReferenceNumber.length + 4);
-		this.informationElementIdentifier = INFORMATION_ELEMENT_IDENTIFIER_16BIT_CSMS;
+		if (csmsReferenceNumber.length < 2) {
+			this.informationElementIdentifier = INFORMATION_ELEMENT_IDENTIFIER_8BIT_CSMS;
+		} else {
+			this.informationElementIdentifier = INFORMATION_ELEMENT_IDENTIFIER_16BIT_CSMS;
+		}
 		this.informationElementLenght = (byte) (userDataHeaderLength - 2);
 		this.csmsReferenceNumber = csmsReferenceNumber;
 		this.noOfParts = noOfParts;
@@ -94,49 +106,15 @@ public class SmsDataPart {
 			byte protocolIdentifier, byte dataCodingScheme,
 			byte validityPeriod, byte userDataLength, byte[] encodedMsg) {
 
-		checkCommonParameters(parentSms, smscInfo, pduHeader, messageReference,
+		this(parentSms, smscInfo, pduHeader, messageReference,
 				encodedDestinationAddress, protocolIdentifier,
-				dataCodingScheme, validityPeriod, userDataLength, encodedMsg);
+				dataCodingScheme, validityPeriod, userDataLength, new byte[] {
+						(byte) 0x00, (byte) 0x00 }, (byte) 1, (byte) 1,
+				encodedMsg);
 
-		// PDU header
-		this.parentSms = parentSms;
-		this.smscInfo = smscInfo;
-		this.pduHeader = pduHeader;
-		this.messageReference = messageReference;
-		this.encodedDestinationAddress = encodedDestinationAddress;
-		this.protocolIdentifier = protocolIdentifier;
-		this.dataCodingScheme = dataCodingScheme;
-		this.validityPeriod = validityPeriod;
-		this.userDataLength = userDataLength;
-
-		// UDH
-		this.hasUdh = false;
-		this.userDataHeaderLength = 0;
-		this.informationElementIdentifier = 0;
-		this.informationElementLenght = 0;
-		this.csmsReferenceNumber = null;
-		this.noOfParts = 0;
-		this.partNo = 0;
-
-		// Message
-		this.encodedMsg = encodedMsg;
-	}
-
-	private void checkCommonParameters(Sms parentSms, byte[] smscInfo,
-			byte pduHeader, byte messageReference,
-			byte[] encodedDestinationAddress, byte protocolIdentifier,
-			byte dataCodingScheme, byte validityPeriod, byte userDataLength,
-			byte[] encodedMsg) throws IllegalArgumentException {
-		if (parentSms == null)
-			throw new IllegalArgumentException("parentSms is null");
-		if (smscInfo == null || smscInfo.length < 1)
+		if (isUdhiSet())
 			throw new IllegalArgumentException(
-					"The SMSC info byte array must at least contain one byte (0x00) for a zero byte SMSC info");
-		if (encodedDestinationAddress == null
-				|| encodedDestinationAddress.length <= 0)
-			throw new IllegalArgumentException(
-					"The encoded destination address must at least contain one byte");
-		// TODO check all the parameters for null, valid length, etc.
+					"The UDHI bit in the PDU header is set! Either you set it by accident or you use the wrong constructor for this class");
 	}
 
 	public Sms getParentSms() {
@@ -160,7 +138,7 @@ public class SmsDataPart {
 				if ((pduHeader & 0x18) != 0)
 					outputStream.write(validityPeriod);
 				outputStream.write(userDataLength);
-				if (hasUdh)
+				if (isUdhiSet())
 					outputStream.write(getUdh());
 				outputStream.write(encodedMsg);
 			} catch (IOException ignored) {
@@ -172,7 +150,7 @@ public class SmsDataPart {
 	}
 
 	public byte[] getUdh() {
-		if (!hasUdh)
+		if (!isUdhiSet())
 			return null;
 
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -187,6 +165,11 @@ public class SmsDataPart {
 		}
 
 		return outputStream.toByteArray();
+	}
+
+	public boolean isUdhiSet() {
+		// If UDHI in the PDU header is set
+		return (pduHeader & 0x40) != 0;
 	}
 
 	public byte[] getSmscInfo() {
@@ -214,6 +197,9 @@ public class SmsDataPart {
 	}
 
 	public byte getValidityPeriod() {
+		if ((pduHeader & 0x18) != 0)
+			return 0;
+
 		return validityPeriod;
 	}
 
@@ -222,26 +208,43 @@ public class SmsDataPart {
 	}
 
 	public byte getUserDataHeaderLength() {
+		if (!isUdhiSet())
+			return 0;
+
 		return userDataHeaderLength;
 	}
 
 	public byte getInformationElementIdentifier() {
+		if (!isUdhiSet())
+			return 0;
+
 		return informationElementIdentifier;
 	}
 
 	public byte getInformationElementLenght() {
+		if (!isUdhiSet())
+			return 0;
 		return informationElementLenght;
 	}
 
 	public byte[] getCsmsReferenceNumber() {
+		if (!isUdhiSet())
+			return null;
+
 		return csmsReferenceNumber;
 	}
 
 	public byte getNoOfParts() {
+		if (!isUdhiSet())
+			return 0;
+
 		return noOfParts;
 	}
 
 	public byte getPartNo() {
+		if (!isUdhiSet())
+			return 0;
+
 		return partNo;
 	}
 

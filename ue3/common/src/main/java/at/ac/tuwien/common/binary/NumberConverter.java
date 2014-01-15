@@ -45,7 +45,6 @@ public class NumberConverter {
 	 *            the array of input bytes
 	 * @return a string with the binary representation
 	 */
-	// TODO needs to be tested
 	public static final String bytesToBinaryString(byte... bytes) {
 		if (bytes == null)
 			throw new IllegalArgumentException("Byte array is null");
@@ -133,7 +132,6 @@ public class NumberConverter {
 	 *             hexadecimal character (upper or lowercase) nor one of the
 	 *             ignored characters mentioned above.
 	 */
-	// TODO needs to be tested
 	public static final byte[] binaryStringToBytes(String s) {
 		if (s == null)
 			throw new IllegalArgumentException("Input string is null");
@@ -178,8 +176,6 @@ public class NumberConverter {
 	 * @throws IllegalArgumentException
 	 *             if bitPosition is negative
 	 */
-	// TODO need to be tested (what happens if bitPosition is above 32 (for 32
-	// bit integers)?)
 	public final static boolean bitAt(int number, int bitPosition)
 			throws IllegalArgumentException {
 		if (bitPosition < 0) {
@@ -244,7 +240,6 @@ public class NumberConverter {
 	 * @return the boolean array representation of the unsigned integer value
 	 *         represented by the argument in binary (base 2).
 	 */
-	// TODO need to be tested
 	public final static boolean[] intToBinaryArray(int n) {
 		int l = 0;
 		int nShifted = n;
@@ -287,7 +282,6 @@ public class NumberConverter {
 	 * @return the boolean array representation of the unsigned byte value
 	 *         represented by the argument in binary (base 2).
 	 */
-	// TODO need to be tested
 	public final static boolean[] byteToBinaryArray(byte n) {
 		int l = 0;
 		byte nShifted = n;
@@ -318,8 +312,8 @@ public class NumberConverter {
 	 * to a byte array with size 4 with leading zeros if necessary.
 	 * </p>
 	 * <p>
-	 * The least significant byte is at index 0, so indexing starts from the
-	 * right side a.k.a. little endian format.
+	 * The most significant byte is at index 0, so indexing starts from the left
+	 * side a.k.a. big endian format.
 	 * </p>
 	 * <strong>Hint:</strong> Original method from <a href=
 	 * "http://stackoverflow.com/questions/6374915/java-convert-int-to-byte-array-of-4-bytes"
@@ -330,7 +324,7 @@ public class NumberConverter {
 	 *         represented by the argument.
 	 */
 	public final static byte[] intToBytes(int n) {
-		return ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(n)
+		return ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putInt(n)
 				.array();
 	}
 
@@ -339,8 +333,8 @@ public class NumberConverter {
 	 * Creates an integer representation of the byte array.
 	 * </p>
 	 * <p>
-	 * The least significant byte has to be at index 0, so indexing starts from
-	 * the right side a.k.a. little endian format.
+	 * The most significant byte has to be at index 0, so indexing starts from
+	 * the left side a.k.a. big endian format.
 	 * </p>
 	 * 
 	 * @param n
@@ -354,23 +348,24 @@ public class NumberConverter {
 			throw new IllegalArgumentException(
 					"Byte array is bigger than 4, integers can only hold 4 byte numbers.");
 
-		return ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getInt();
+		return ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN).getInt();
 	}
 
 	/**
-	 * Creates an integer from boolean array treating it as binary number
+	 * Creates an integer from boolean array treating it as binary number. It
+	 * will only take the first 32 "bits" of the array since integer is limited
+	 * to this.
 	 * 
 	 * @param arr
 	 *            binary number
 	 */
-	// TODO need to be tested (especially with big numbers - what happens?)
 	public final static int binaryArrayToInt(boolean[] arr) {
 		if (arr == null)
 			throw new IllegalArgumentException("binary array is null");
 
 		int result = 0;
 
-		for (int i = 0; i < arr.length; i++) {
+		for (int i = 0; i < arr.length && i < 32; i++) {
 			result += (arr[i] ? 1 << i : 0);
 		}
 
